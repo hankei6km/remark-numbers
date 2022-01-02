@@ -33,17 +33,14 @@
     "@types/lodash.tosafeinteger": "^4.0.6",
     "lodash.tosafeinteger": "^4.0.4",
     "unified": "^10.1.1",
-    "unist-util-visit-parents": "^5.1.0",
-    "yargs": "^17.3.1"
+    "unist-util-visit-parents": "^5.1.0"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
     "@types/mdast": "^3.0.10",
     "@types/node": "^17.0.6",
     "@types/unist": "^2.0.6",
-    "@types/yargs": "^17.0.8",
     "jest": "^27.4.5",
-    "nodemon": "^2.0.15",
     "remark-directive": "^2.0.1",
     "remark-parse": "^10.0.1",
     "remark-stringify": "^10.0.2",
