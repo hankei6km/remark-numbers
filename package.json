@@ -12,7 +12,9 @@
     "url": "https://github.com/hankei6km/remark-numbers/issues"
   },
   "keywords": [
-    "remnrk"
+    "remnrk",
+    "plugin",
+    "numbers"
   ],
   "main": "dist/index.js",
   "exports": "./dist/index.js",
