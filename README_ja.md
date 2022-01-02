@@ -1,6 +1,6 @@
 # remark-numbers
 
-remark plugin to assign serial numbers.
+Markdown 内で連番を振るプラグイン。
 
 ## Install
 
@@ -123,7 +123,7 @@ yield:
 
 ## CLI
 
-[`remark-cli`](https://github.com/remarkjs/remark/tree/main/packages/remark-cli) is required `remark-numbers` to run as command.
+コマンドとして実行するには [`remark-cli`](https://github.com/remarkjs/remark/tree/main/packages/remark-cli) が必要です。
 
 ### Install
 
