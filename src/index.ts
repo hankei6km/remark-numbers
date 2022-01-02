@@ -1,2 +1,2 @@
-import countChars from './count.js'
-export { countChars }
+import { remarkNumbers } from './lib/numbers.js'
+export default remarkNumbers
