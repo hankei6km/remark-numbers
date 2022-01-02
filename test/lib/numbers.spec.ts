@@ -77,16 +77,25 @@ describe('remarkNumbers()', () => {
       )
     ).toEqual('# test\n\n1\n\n3\n\n2\n\n3\n')
   })
-  it('should remove node if the value is not defined', async () => {
+  it('should insert a error message if the value is not defined', async () => {
     expect(
       await f(
         '# test\n\n:num{name="foo" reset}\n\ns1:num{name="bar" up}s2\n\ns3:num{name="car" look}s4\n\n:num{name="foo" up}\n'
       )
-    ).toEqual('# test\n\n\n\ns1s2\n\ns3s4\n\n1\n')
+    ).toEqual(
+      '# test\n\n\n\ns1(ReferenceError: "bar" is not defined)s2\n\ns3(ReferenceError: "car" is not defined)s4\n\n1\n'
+    )
     expect(
       await f(
         '# test\n\n:num{name="foo" define}\n\ns1:num{name="bar"}s2\n\n:num{name="foo"}\n'
       )
-    ).toEqual('# test\n\n1\n\ns1s2\n\n1\n')
+    ).toEqual(
+      '# test\n\n1\n\ns1(ReferenceError: "bar" is not defined)s2\n\n1\n'
+    )
+  })
+  it('should escape varble name in error message', async () => {
+    expect(await f('# test\n\ns1:num{name="[bar]"}s2\n')).toEqual(
+      '# test\n\ns1(ReferenceError: "\\[bar]" is not defined)s2\n'
+    )
   })
 })

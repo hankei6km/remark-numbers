@@ -7,6 +7,13 @@ import toSafeInteger from 'lodash.tosafeinteger'
 
 export type RemarkNumbersOptions = {}
 
+export function errMessageNotDefined(name: string): Text {
+  return {
+    type: 'text',
+    value: `(ReferenceError: "${name}" is not defined)`
+  }
+}
+
 export const remarkNumbers: Plugin<
   [RemarkNumbersOptions] | [RemarkNumbersOptions[]] | [],
   string,
@@ -54,18 +61,22 @@ export const remarkNumbers: Plugin<
           defCnt++
         } else if (up !== undefined) {
           // up はカウントアップし、値をテキストとして扱う.
-          // 定義されていない場合は削除.
+          // 定義されていない場合はエラーメッセージ.
           let v = numners[name]
           if (v !== undefined) {
             v++
             replace = { type: 'text', value: `${v}` }
             numners[name] = v
+          } else {
+            replace = errMessageNotDefined(name)
           }
         } else if (look !== undefined) {
           // look はカウント中の値を参照しテキストとして扱う
-          // 定義されていない場合は削除.
+          // 定義されていない場合はエラーメッセージ.
           if (numners[name] !== undefined) {
             replace = { type: 'text', value: `${numners[name]}` }
+          } else {
+            replace = errMessageNotDefined(name)
           }
         }
 
@@ -91,9 +102,11 @@ export const remarkNumbers: Plugin<
         let replace: Text | undefined = undefined
 
         // pre で確定した値を参照しテキストとして扱う.
-        // 定義されていない場合は削除.
+        // 定義されていない場合はエラーメッセージ.
         if (numners[name] !== undefined) {
           replace = { type: 'text', value: `${numners[name]}` }
+        } else {
+          replace = errMessageNotDefined(name)
         }
 
         if (replace) {
