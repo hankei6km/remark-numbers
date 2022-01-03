@@ -1,8 +1,31 @@
 import { unified } from 'unified'
+import { Node } from 'unist'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import remarkDirective from 'remark-directive'
-import { remarkNumbers, RemarkNumbersOptions } from '../../src/lib/numbers'
+import {
+  DefineCounter,
+  remarkNumbers,
+  RemarkNumbersOptions
+} from '../../src/lib/numbers'
+
+describe('DefineCounter', () => {
+  it('should count up counter', async () => {
+    const counter = new DefineCounter()
+    expect(counter.up()).toEqual(1)
+    expect(counter.up()).toEqual(2)
+    expect(counter.look()).toEqual(2)
+  })
+  it('should reset counter', async () => {
+    const counter = new DefineCounter()
+    counter.addResetTrigger({ type: 'heading', depth: 2 })
+    expect(counter.up()).toEqual(1)
+    expect(counter.reset({ type: 'heading', depth: 2 } as Node)).toBeTruthy()
+    expect(counter.up()).toEqual(1)
+    expect(counter.reset({ type: 'heading', depth: 3 } as Node)).toBeFalsy()
+    expect(counter.up()).toEqual(2)
+  })
+})
 
 describe('remarkNumbers()', () => {
   const f = async (
@@ -36,7 +59,7 @@ describe('remarkNumbers()', () => {
   it('should assign the value by "reset"(multiple)', async () => {
     expect(
       await f(
-        '# test\n\n:num{name="foo" reset}\n:num{name="bar" reset}\n\n:nun{name="foo" up}\n\n:num{name="bar" up}\n\n:num{name="bar" up}\n\n:num{name="bar" up}\n\n:num{name="foo" up}\n'
+        '# test\n\n:num{name="foo" reset}\n:num{name="bar" reset}\n\n:num{name="foo" up}\n\n:num{name="bar" up}\n\n:num{name="bar" up}\n\n:num{name="bar" up}\n\n:num{name="foo" up}\n'
       )
     ).toEqual('# test\n\n\n\n\n1\n\n1\n\n2\n\n3\n\n2\n')
   })
@@ -63,10 +86,19 @@ describe('remarkNumbers()', () => {
       )
     ).toEqual('# test\n\n1\n\n2\n\n3\n')
   })
+  it('should reset by reset container', async () => {
+    expect(
+      await f(
+        '# test\n\n:::num{reset}\n## :num\n:::\n\n## head2-1\n\n:num{name="foo" define}\n\n:num{name="bar" define}\n\n## head2-2\n\n:num{name="car" define}\n\n## head2-3\n\n:num{name="foo"}:num{name="bar"}:num{name="car"}\n'
+      )
+    ).toEqual(
+      '# test\n\n## head2-1\n\n1\n\n2\n\n## head2-2\n\n1\n\n## head2-3\n\n121\n'
+    )
+  })
   it('should lookup variable that is counter', async () => {
     expect(
       await f(
-        '# test\n\n:num{name="foo" reset}\n\n:nun{name="foo" up}\n\n:num{name="foo" look}\n\n:num{name="foo" up}\n'
+        '# test\n\n:num{name="foo" reset}\n\n:num{name="foo" up}\n\n:num{name="foo" look}\n\n:num{name="foo" up}\n'
       )
     ).toEqual('# test\n\n\n\n1\n\n1\n\n2\n')
   })
