@@ -32,8 +32,6 @@
     "csb:test": "npm test -- --runInBand --watchAll"
   },
   "dependencies": {
-    "@types/lodash.tosafeinteger": "^4.0.6",
-    "lodash.tosafeinteger": "^4.0.4",
     "unified": "^10.1.1",
     "unist-util-visit-parents": "^5.1.0"
   },
