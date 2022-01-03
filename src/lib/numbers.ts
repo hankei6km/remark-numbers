@@ -100,7 +100,10 @@ export const remarkNumbers: Plugin<
     return false
   }
   const visitTest = (node: Node) => {
-    if (node.type === 'textDirective') {
+    if (
+      node.type === 'textDirective' &&
+      (node as ContainerDirective).name === directiveName
+    ) {
       return true
     }
     return false

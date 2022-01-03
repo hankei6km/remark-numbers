@@ -119,7 +119,7 @@ describe('remarkNumbers()', () => {
   it('should lookup variable that is define at post', async () => {
     expect(
       await f(
-        '# test\n\n:num{name="foo" define}\n\n:nun{name="car"}\n\n:num{name="bar" define}\n\n:num{name="car" define}\n'
+        '# test\n\n:num{name="foo" define}\n\n:num{name="car"}\n\n:num{name="bar" define}\n\n:num{name="car" define}\n'
       )
     ).toEqual('# test\n\n1\n\n3\n\n2\n\n3\n')
   })
