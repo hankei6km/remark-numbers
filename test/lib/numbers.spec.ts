@@ -8,7 +8,7 @@ import {
   Numbers,
   remarkNumbers,
   RemarkNumbersOptions
-} from '../../src/lib/numbers'
+} from '../../src/lib/numbers.js'
 
 describe('DefineCounter', () => {
   it('should count up counter', async () => {
