@@ -12,10 +12,10 @@ export class DefineCounter {
   private counter: number = 0
   private resetTrigger: DefineCounterTrigger[] = []
   constructor() {}
-  addResetTrigger = (t: DefineCounterTrigger) => {
+  addResetTrigger(t: DefineCounterTrigger) {
     this.resetTrigger.push({ type: t.type, depth: t.depth })
   }
-  reset = (node: Node): boolean => {
+  reset(node: Node): boolean {
     if (
       this.resetTrigger.findIndex(
         ({ type, depth }) => type === node.type && depth === (node as any).depth
@@ -26,11 +26,13 @@ export class DefineCounter {
     }
     return false
   }
-  up = (): number => {
+  up(): number {
     this.counter++
     return this.counter
   }
-  look = (): number => this.counter
+  look(): number {
+    return this.counter
+  }
 }
 
 export function errMessageNotDefined(name: string): Text {
