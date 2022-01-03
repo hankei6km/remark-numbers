@@ -4,6 +4,8 @@ import { Parent, Root, Text } from 'mdast'
 import { TextDirective, ContainerDirective } from 'mdast-util-directive'
 import { visitParents } from 'unist-util-visit-parents'
 
+const directiveName = 'num'
+
 export type RemarkNumbersOptions = {}
 
 export type DefineCounterTrigger = { type: string; depth: number }
@@ -91,7 +93,7 @@ export const remarkNumbers: Plugin<
   const visitTestPre = (node: Node) => {
     if (
       node.type === 'containerDirective' &&
-      (node as ContainerDirective).name === 'num'
+      (node as ContainerDirective).name === directiveName
     ) {
       return true
     }
@@ -119,7 +121,7 @@ export const remarkNumbers: Plugin<
             n.type == 'heading' &&
             n.children.length === 1 &&
             n.children[0].type === 'textDirective' &&
-            n.children[0].name === 'num'
+            n.children[0].name === directiveName
           ) {
             numbers.addResetTrigger({ type: n.type, depth: n.depth })
           }
@@ -134,7 +136,7 @@ export const remarkNumbers: Plugin<
       // visitTest でフィルターしていないのでここで判定する.
       if (
         node.type === 'textDirective' &&
-        (node as TextDirective).name === 'num'
+        (node as TextDirective).name === directiveName
       ) {
         const d = node as TextDirective
         const name: string | undefined = d.attributes?.name
