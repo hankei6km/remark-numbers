@@ -2,7 +2,7 @@ import { Plugin, Transformer } from 'unified'
 import { Node } from 'unist'
 import { Parent, Root, Text } from 'mdast'
 import { TextDirective, ContainerDirective } from 'mdast-util-directive'
-import { visitParents, SKIP } from 'unist-util-visit-parents'
+import { visitParents } from 'unist-util-visit-parents'
 
 export type RemarkNumbersOptions = {}
 
@@ -153,7 +153,7 @@ export const remarkNumbers: Plugin<
             type: 'text',
             value: `${numbers.look(name)}`
           }
-          return SKIP
+          return nodeIdx
         }
       }
     }
@@ -177,7 +177,7 @@ export const remarkNumbers: Plugin<
           parent.children[nodeIdx] = errMessageNotDefined(name)
         }
 
-        return SKIP
+        return nodeIdx
       }
     }
 
