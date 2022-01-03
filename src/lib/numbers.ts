@@ -2,8 +2,7 @@ import { Plugin, Transformer } from 'unified'
 import { Node } from 'unist'
 import { Parent, Root, Text } from 'mdast'
 import { TextDirective, ContainerDirective } from 'mdast-util-directive'
-import { visitParents, CONTINUE, SKIP } from 'unist-util-visit-parents'
-import toSafeInteger from 'lodash.tosafeinteger'
+import { visitParents, SKIP } from 'unist-util-visit-parents'
 
 export type RemarkNumbersOptions = {}
 
@@ -32,6 +31,47 @@ export class DefineCounter {
   }
   look(): number {
     return this.counter
+  }
+}
+
+export class Numbers {
+  // counters のフィールド名は series のみで指定される.
+  // counters[''].up()  // global
+  // counters['fig'].up() // fig
+  private counters: Record<string, DefineCounter> = {}
+  private resetTrigger: DefineCounterTrigger[] = []
+  // numbers のフィールド名は series 込みで指定される.
+  // numbers['foo'] // global series
+  // numbers['fig.foo'] // fig series
+  private numbers: Record<string, number> = {}
+  constructor() {}
+  static getSeries(name: string): string {
+    const t: string[] = name.split('.', 2)
+    if (t.length >= 2) {
+      return t[0]
+    }
+    return ''
+  }
+  define(name: string) {
+    // seiries のカウンターを取得.
+    const s = Numbers.getSeries(name)
+    if (this.counters[s] === undefined) {
+      this.counters[s] = new DefineCounter()
+      this.resetTrigger.forEach((t) => this.counters[s].addResetTrigger(t))
+    }
+    // series のカウンターで変数を定義.
+    // 存在している場合は上書き.
+    this.numbers[name] = this.counters[s].up()
+  }
+  look(name: string): number | undefined {
+    return this.numbers[name]
+  }
+  addResetTrigger(t: DefineCounterTrigger) {
+    // ここでは定義を保存しておくだけ(add するときに設定する).
+    this.resetTrigger.push({ type: t.type, depth: t.depth })
+  }
+  reset(node: Node) {
+    Object.values(this.counters).forEach((v) => v.reset(node))
   }
 }
 
@@ -64,8 +104,7 @@ export const remarkNumbers: Plugin<
     return false
   }
   return function transformer(tree: Node): void {
-    const numners: Record<string, number> = {}
-    const defineCounter = new DefineCounter()
+    const numbers = new Numbers()
 
     const visitorPre = (node: Node, parents: Parent[]) => {
       const d = node as ContainerDirective
@@ -82,7 +121,7 @@ export const remarkNumbers: Plugin<
             n.children[0].type === 'textDirective' &&
             n.children[0].name === 'num'
           ) {
-            defineCounter.addResetTrigger({ type: n.type, depth: n.depth })
+            numbers.addResetTrigger({ type: n.type, depth: n.depth })
           }
         })
         parent.children.splice(nodeIdx, 1)
@@ -90,7 +129,7 @@ export const remarkNumbers: Plugin<
     }
 
     const visitor = (node: Node, parents: Parent[]) => {
-      defineCounter.reset(node) // リセットさせる.
+      numbers.reset(node) // リセットさせる.
 
       // visitTest でフィルターしていないのでここで判定する.
       if (
@@ -100,59 +139,21 @@ export const remarkNumbers: Plugin<
         const d = node as TextDirective
         const name: string | undefined = d.attributes?.name
 
-        const reset: string | undefined = d.attributes?.reset
         const def: string | undefined = d.attributes?.define
-        const up: string | undefined = d.attributes?.up
-        const look: string | undefined = d.attributes?.look
 
-        if (
-          name &&
-          (reset !== undefined ||
-            def !== undefined ||
-            up !== undefined ||
-            look !== undefined)
-        ) {
-          // 属性に name と何かが指定されているときだけ.
+        if (name && def !== undefined) {
+          // 属性に name と define が指定されているときだけ.
           const parentsLen = parents.length
           const parent: Parent = parents[parentsLen - 1]
           const nodeIdx = parent.children.findIndex((n) => n === node)
 
-          let replace: Text | undefined = undefined
-          if (reset !== undefined) {
-            // reset は値を設定するだけ(node は削除される)
-            numners[name] = toSafeInteger(reset)
-          } else if (def !== undefined) {
-            // def は def された回数を値として設定、そのまま値をテキストとして扱う.
-            const defCnt = defineCounter.up()
-            numners[name] = defCnt
-            replace = { type: 'text', value: `${defCnt}` }
-          } else if (up !== undefined) {
-            // up はカウントアップし、値をテキストとして扱う.
-            // 定義されていない場合はエラーメッセージ.
-            let v = numners[name]
-            if (v !== undefined) {
-              v++
-              replace = { type: 'text', value: `${v}` }
-              numners[name] = v
-            } else {
-              replace = errMessageNotDefined(name)
-            }
-          } else if (look !== undefined) {
-            // look はカウント中の値を参照しテキストとして扱う
-            // 定義されていない場合はエラーメッセージ.
-            if (numners[name] !== undefined) {
-              replace = { type: 'text', value: `${numners[name]}` }
-            } else {
-              replace = errMessageNotDefined(name)
-            }
+          // def は def された回数を値として設定、そのまま値をテキストとして扱う.
+          numbers.define(name)
+          parent.children[nodeIdx] = {
+            type: 'text',
+            value: `${numbers.look(name)}`
           }
-
-          if (replace) {
-            parent.children[nodeIdx] = replace
-            return SKIP
-          }
-          parent.children.splice(nodeIdx, 1)
-          return CONTINUE
+          return SKIP
         }
       }
     }
@@ -167,22 +168,16 @@ export const remarkNumbers: Plugin<
         const parent: Parent = parents[parentsLen - 1]
         const nodeIdx = parent.children.findIndex((n) => n === node)
 
-        let replace: Text | undefined = undefined
-
         // pre で確定した値を参照しテキストとして扱う.
         // 定義されていない場合はエラーメッセージ.
-        if (numners[name] !== undefined) {
-          replace = { type: 'text', value: `${numners[name]}` }
+        const v = numbers.look(name)
+        if (v !== undefined) {
+          parent.children[nodeIdx] = { type: 'text', value: `${v}` }
         } else {
-          replace = errMessageNotDefined(name)
+          parent.children[nodeIdx] = errMessageNotDefined(name)
         }
 
-        if (replace) {
-          parent.children[nodeIdx] = replace
-          return SKIP
-        }
-        parent.children.splice(nodeIdx, 1)
-        return CONTINUE
+        return SKIP
       }
     }
 
