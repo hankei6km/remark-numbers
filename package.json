@@ -1,6 +1,6 @@
 {
   "name": "@hankei6km/remark-numbers",
-  "version": "0.1.1",
+  "version": "0.2.0-pre.0",
   "description": "remark plugin to assign serial numbers",
   "author": "hankei6km <hankei6km@gmail.com> (https://github.com/hankei6km)",
   "license": "MIT",
@@ -32,8 +32,6 @@
     "csb:test": "npm test -- --runInBand --watchAll"
   },
   "dependencies": {
-    "@types/lodash.tosafeinteger": "^4.0.6",
-    "lodash.tosafeinteger": "^4.0.4",
     "unified": "^10.1.1",
     "unist-util-visit-parents": "^5.1.0"
   },
