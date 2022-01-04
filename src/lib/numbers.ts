@@ -16,8 +16,9 @@ export class DefineCounter {
   addResetTrigger(t: DefineCounterTrigger) {
     this.resetTrigger.push({ type: t.type, depth: t.depth })
   }
-  reset(node: Node): boolean {
+  reset(node: Node, parents: Parent[]): boolean {
     if (
+      parents.length === 1 &&
       this.resetTrigger.findIndex(
         ({ type, depth }) => type === node.type && depth === (node as any).depth
       ) >= 0
@@ -72,8 +73,8 @@ export class Numbers {
     // ここでは定義を保存しておくだけ(add するときに設定する).
     this.resetTrigger.push({ type: t.type, depth: t.depth })
   }
-  reset(node: Node) {
-    Object.values(this.counters).forEach((v) => v.reset(node))
+  reset(node: Node, parents: Parent[]) {
+    Object.values(this.counters).forEach((v) => v.reset(node, parents))
   }
 }
 
@@ -100,7 +101,10 @@ export const remarkNumbers: Plugin<
     return false
   }
   const visitTest = (node: Node) => {
-    if (node.type === 'textDirective') {
+    if (
+      node.type === 'textDirective' &&
+      (node as ContainerDirective).name === directiveName
+    ) {
       return true
     }
     return false
@@ -131,7 +135,7 @@ export const remarkNumbers: Plugin<
     }
 
     const visitor = (node: Node, parents: Parent[]) => {
-      numbers.reset(node) // リセットさせる.
+      numbers.reset(node, parents) // リセットさせる.
 
       // visitTest でフィルターしていないのでここで判定する.
       if (

@@ -21,10 +21,25 @@ describe('DefineCounter', () => {
     const counter = new DefineCounter()
     counter.addResetTrigger({ type: 'heading', depth: 2 })
     expect(counter.up()).toEqual(1)
-    expect(counter.reset({ type: 'heading', depth: 2 } as Node)).toBeTruthy()
+    expect(
+      counter.reset({ type: 'heading', depth: 2 } as Node, [
+        { type: 'root', children: [] }
+      ])
+    ).toBeTruthy()
     expect(counter.up()).toEqual(1)
-    expect(counter.reset({ type: 'heading', depth: 3 } as Node)).toBeFalsy()
+    expect(
+      counter.reset({ type: 'heading', depth: 2 } as Node, [
+        { type: 'root', children: [] },
+        { type: 'containerDirective', children: [] } // 階層が深いのでリセットしない.
+      ])
+    ).toBeFalsy()
     expect(counter.up()).toEqual(2)
+    expect(
+      counter.reset({ type: 'heading', depth: 3 } as Node, [
+        { type: 'root', children: [] }
+      ])
+    ).toBeFalsy()
+    expect(counter.up()).toEqual(3)
   })
 })
 
@@ -59,9 +74,13 @@ describe('Numbers', () => {
     numbers.define('foo')
     numbers.define('bar')
     numbers.define('fig.foo')
-    numbers.reset({ type: 'heading', depth: 2 } as Node)
+    numbers.reset({ type: 'heading', depth: 2 } as Node, [
+      { type: 'root', children: [] }
+    ])
     numbers.define('fig.bar')
-    numbers.reset({ type: 'heading', depth: 3 } as Node)
+    numbers.reset({ type: 'heading', depth: 3 } as Node, [
+      { type: 'root', children: [] }
+    ])
     numbers.define('car')
     numbers.define('fig.car')
     expect(numbers.look('foo')).toEqual(1)
@@ -119,7 +138,7 @@ describe('remarkNumbers()', () => {
   it('should lookup variable that is define at post', async () => {
     expect(
       await f(
-        '# test\n\n:num{name="foo" define}\n\n:nun{name="car"}\n\n:num{name="bar" define}\n\n:num{name="car" define}\n'
+        '# test\n\n:num{name="foo" define}\n\n:num{name="car"}\n\n:num{name="bar" define}\n\n:num{name="car" define}\n'
       )
     ).toEqual('# test\n\n1\n\n3\n\n2\n\n3\n')
   })
@@ -139,6 +158,15 @@ describe('remarkNumbers()', () => {
       )
     ).toEqual(
       '# test\n\n## head2-1\n\n1\n\n2\n\n## head2-2\n\n1\n\n## head2-3\n\n121\n'
+    )
+  })
+  it('should skip resetting counter by deeper heading', async () => {
+    expect(
+      await f(
+        '# test\n\n:::num{reset}\n## :num\n:::\n\n## head2-1\n\n:num{name="foo" define}\n\n:::cnt{reset}\n## :cnt{name="chapter"}\n:::\n\n:num{name="bar" define}\n\n:num{name="foo"}:num{name="bar"}'
+      )
+    ).toEqual(
+      '# test\n\n## head2-1\n\n1\n\n:::cnt{reset}\n## :cnt{name="chapter"}\n:::\n\n2\n\n12\n'
     )
   })
   it('should reset by reset container(series)', async () => {
