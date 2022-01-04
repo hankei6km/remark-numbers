@@ -55,40 +55,40 @@ describe('Numbers', () => {
     const numbers = new Numbers()
     numbers.define('foo')
     numbers.define('bar')
-    numbers.define('fig.foo')
-    numbers.define('fig.bar')
+    numbers.define('fig-foo')
+    numbers.define('fig-bar')
     numbers.define('car')
-    numbers.define('tbl.foo')
-    numbers.define('tbl.bar')
+    numbers.define('tbl-foo')
+    numbers.define('tbl-bar')
     expect(numbers.look('foo')).toEqual(1)
     expect(numbers.look('bar')).toEqual(2)
     expect(numbers.look('car')).toEqual(3)
-    expect(numbers.look('fig.foo')).toEqual(1)
-    expect(numbers.look('fig.bar')).toEqual(2)
-    expect(numbers.look('tbl.foo')).toEqual(1)
-    expect(numbers.look('tbl.bar')).toEqual(2)
+    expect(numbers.look('fig-foo')).toEqual(1)
+    expect(numbers.look('fig-bar')).toEqual(2)
+    expect(numbers.look('tbl-foo')).toEqual(1)
+    expect(numbers.look('tbl-bar')).toEqual(2)
   })
   it('should reset counter', async () => {
     const numbers = new Numbers()
     numbers.addResetTrigger({ type: 'heading', depth: 2 })
     numbers.define('foo')
     numbers.define('bar')
-    numbers.define('fig.foo')
+    numbers.define('fig-foo')
     numbers.reset({ type: 'heading', depth: 2 } as Node, [
       { type: 'root', children: [] }
     ])
-    numbers.define('fig.bar')
+    numbers.define('fig-bar')
     numbers.reset({ type: 'heading', depth: 3 } as Node, [
       { type: 'root', children: [] }
     ])
     numbers.define('car')
-    numbers.define('fig.car')
+    numbers.define('fig-car')
     expect(numbers.look('foo')).toEqual(1)
     expect(numbers.look('bar')).toEqual(2)
     expect(numbers.look('car')).toEqual(1)
-    expect(numbers.look('fig.foo')).toEqual(1)
-    expect(numbers.look('fig.bar')).toEqual(1)
-    expect(numbers.look('fig.car')).toEqual(2)
+    expect(numbers.look('fig-foo')).toEqual(1)
+    expect(numbers.look('fig-bar')).toEqual(1)
+    expect(numbers.look('fig-car')).toEqual(2)
   })
 })
 
@@ -124,7 +124,7 @@ describe('remarkNumbers()', () => {
   it('should assign the value by "define"(series)', async () => {
     expect(
       await f(
-        '# test\n\n:num{id="fig.foo" define}:num{id="tbl.foo" define}:num{id="fig.bar" define}\n\n## test1\n\n:num{id="fig.foo"}:num{id="tbl.foo"}:num{id="fig.bar"}\n'
+        '# test\n\n:num{#fig-foo define}:num{#tbl-foo define}:num{#fig-bar define}\n\n## test1\n\n:num{#fig-foo}:num{#tbl-foo}:num{#fig-bar}\n'
       )
     ).toEqual('# test\n\n112\n\n## test1\n\n112\n')
   })
@@ -170,7 +170,7 @@ describe('remarkNumbers()', () => {
   it('should reset by reset container(series)', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset}\n## :num\n:::\n\n## head2-1\n\n:num{id="fig.foo" define}\n\n:num{id="fig.bar" define}\n\n## head2-2\n\n:num{id="fig.car" define}\n\n## head2-3\n\n:num{id="fig.foo"}:num{id="fig.bar"}:num{id="fig.car"}\n'
+        '# test\n\n:::num{reset}\n## :num\n:::\n\n## head2-1\n\n:num{#fig-foo define}\n\n:num{#fig-bar define}\n\n## head2-2\n\n:num{#fig-car define}\n\n## head2-3\n\n:num{#fig-foo}:num{#fig-bar}:num{#fig-car}\n'
       )
     ).toEqual(
       '# test\n\n## head2-1\n\n1\n\n2\n\n## head2-2\n\n1\n\n## head2-3\n\n121\n'

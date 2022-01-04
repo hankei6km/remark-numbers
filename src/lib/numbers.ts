@@ -49,7 +49,7 @@ export class Numbers {
   private numbers: Record<string, number> = {}
   constructor() {}
   static getSeries(id: string): string {
-    const t: string[] = id.split('.', 2)
+    const t: string[] = id.split('-', 2)
     if (t.length >= 2) {
       return t[0]
     }
