@@ -4,21 +4,21 @@ import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import remarkDirective from 'remark-directive'
 import {
-  DefineCounter,
+  AssignCounter,
   Numbers,
   remarkNumbers,
   RemarkNumbersOptions
 } from '../../src/lib/numbers.js'
 
-describe('DefineCounter', () => {
+describe('AssingCounter', () => {
   it('should count up counter', async () => {
-    const counter = new DefineCounter()
+    const counter = new AssignCounter()
     expect(counter.up()).toEqual(1)
     expect(counter.up()).toEqual(2)
     expect(counter.look()).toEqual(2)
   })
   it('should reset counter', async () => {
-    const counter = new DefineCounter()
+    const counter = new AssignCounter()
     counter.addResetTrigger({ type: 'heading', depth: 2 })
     expect(counter.up()).toEqual(1)
     expect(

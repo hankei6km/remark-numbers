@@ -8,12 +8,12 @@ const directiveName = 'num'
 
 export type RemarkNumbersOptions = {}
 
-export type DefineCounterTrigger = { type: string; depth: number }
-export class DefineCounter {
+export type AssignCounterTrigger = { type: string; depth: number }
+export class AssignCounter {
   private counter: number = 0
-  private resetTrigger: DefineCounterTrigger[] = []
+  private resetTrigger: AssignCounterTrigger[] = []
   constructor() {}
-  addResetTrigger(t: DefineCounterTrigger) {
+  addResetTrigger(t: AssignCounterTrigger) {
     this.resetTrigger.push({ type: t.type, depth: t.depth })
   }
   reset(node: Node, parents: Parent[]): boolean {
@@ -41,8 +41,8 @@ export class Numbers {
   // counters のフィールド名は series のみで指定される.
   // counters[''].up()  // global
   // counters['fig'].up() // fig
-  private counters: Record<string, DefineCounter> = {}
-  private resetTrigger: DefineCounterTrigger[] = []
+  private counters: Record<string, AssignCounter> = {}
+  private resetTrigger: AssignCounterTrigger[] = []
   // numbers のフィールド名は series 込みで指定される.
   // numbers['foo'] // global series
   // numbers['fig.foo'] // fig series
@@ -59,7 +59,7 @@ export class Numbers {
     // seiries のカウンターを取得.
     const s = Numbers.getSeries(id)
     if (this.counters[s] === undefined) {
-      this.counters[s] = new DefineCounter()
+      this.counters[s] = new AssignCounter()
       this.resetTrigger.forEach((t) => this.counters[s].addResetTrigger(t))
     }
     // series のカウンターで変数を定義.
@@ -69,7 +69,7 @@ export class Numbers {
   look(id: string): number | undefined {
     return this.numbers[id]
   }
-  addResetTrigger(t: DefineCounterTrigger) {
+  addResetTrigger(t: AssignCounterTrigger) {
     // ここでは定義を保存しておくだけ(add するときに設定する).
     this.resetTrigger.push({ type: t.type, depth: t.depth })
   }
