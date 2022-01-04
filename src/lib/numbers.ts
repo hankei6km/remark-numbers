@@ -145,15 +145,13 @@ export const remarkNumbers: Plugin<
         const d = node as TextDirective
         const id: string | undefined = d.attributes?.id
 
-        const def: string | undefined = d.attributes?.define
-
-        if (id && def !== undefined) {
-          // 属性に id と define が指定されているときだけ.
+        if (id) {
+          // 属性に id が指定されているときだけ(空白は除外).
           const parentsLen = parents.length
           const parent: Parent = parents[parentsLen - 1]
           const nodeIdx = parent.children.findIndex((n) => n === node)
 
-          // def は def された回数を値として設定、そのまま値をテキストとして扱う.
+          // define は define された回数を値として設定、そのまま値をテキストとして扱う.
           numbers.define(id)
           parent.children[nodeIdx] = {
             type: 'text',
@@ -166,21 +164,27 @@ export const remarkNumbers: Plugin<
 
     const visitorPost = (node: Node, parents: Parent[]) => {
       const d = node as TextDirective
-      const id: string | undefined = d.attributes?.id
+      let ref = ''
+      if (d.children.length === 1 && d.children[0].type === 'text') {
+        ref = d.children[0].value
+        if (ref[0] === '$') {
+          ref = ref.slice(1)
+        }
+      }
 
-      if (id) {
-        // id 属性が指定されているときだけ.
+      if (ref) {
+        // ref が指定されているときだけ.
         const parentsLen = parents.length
         const parent: Parent = parents[parentsLen - 1]
         const nodeIdx = parent.children.findIndex((n) => n === node)
 
         // pre で確定した値を参照しテキストとして扱う.
         // 定義されていない場合はエラーメッセージ.
-        const v = numbers.look(id)
+        const v = numbers.look(ref)
         if (v !== undefined) {
           parent.children[nodeIdx] = { type: 'text', value: `${v}` }
         } else {
-          parent.children[nodeIdx] = errMessageNotDefined(id)
+          parent.children[nodeIdx] = errMessageNotDefined(ref)
         }
 
         return nodeIdx
