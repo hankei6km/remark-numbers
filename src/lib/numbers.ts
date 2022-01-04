@@ -6,7 +6,7 @@ import { visitParents, SKIP } from 'unist-util-visit-parents'
 import toSafeInteger from 'lodash.tosafeinteger'
 import { Assign } from './assign.js'
 import { Counter } from './counter.js'
-import { getRefernceFromLabel } from './util.js'
+import { decodeParents, getRefernceFromLabel } from './util.js'
 
 const directiveName = 'num'
 
@@ -62,9 +62,7 @@ export const remarkNumbers: Plugin<
       const d = node as ContainerDirective
       if (d.attributes?.reset !== undefined) {
         // reset 用定義.
-        const parentsLen = parents.length
-        const parent: Parent = parents[parentsLen - 1]
-        const nodeIdx = parent.children.findIndex((n) => n === node)
+        const [, parent, nodeIdx] = decodeParents(parents, node)
         // とりあえず paragraph と heading のみ対応.
         d.children.forEach((n) => {
           if (
@@ -92,9 +90,7 @@ export const remarkNumbers: Plugin<
         return nodeIdx
       } else if (d.attributes?.increment !== undefined) {
         // increment 用定義.
-        const parentsLen = parents.length
-        const parent: Parent = parents[parentsLen - 1]
-        const nodeIdx = parent.children.findIndex((n) => n === node)
+        const [, parent, nodeIdx] = decodeParents(parents, node)
         // とりあえず heading のみ対応.
         let replace: Text | undefined = undefined
         d.children.forEach((n) => {
@@ -129,9 +125,7 @@ export const remarkNumbers: Plugin<
       const d = node as ContainerDirective
       if (d.attributes?.reset !== undefined) {
         // reset 用定義.
-        const parentsLen = parents.length
-        const parent: Parent = parents[parentsLen - 1]
-        const nodeIdx = parent.children.findIndex((n) => n === node)
+        const [, parent, nodeIdx] = decodeParents(parents, node)
         // とりあえず heading のみ対応.
         d.children.forEach((n) => {
           if (
@@ -163,9 +157,7 @@ export const remarkNumbers: Plugin<
 
         if (id) {
           // 属性に id が指定されているとき(空白は除外)は定義系の処理.
-          const parentsLen = parents.length
-          const parent: Parent = parents[parentsLen - 1]
-          const nodeIdx = parent.children.findIndex((n) => n === node)
+          const [, parent, nodeIdx] = decodeParents(parents, node)
 
           const reset: string | undefined = d.attributes?.reset
           if (reset !== undefined) {
@@ -191,9 +183,7 @@ export const remarkNumbers: Plugin<
           getRefernceFromLabel(node as TextDirective)
         if (ref) {
           // ref が指定されているときは look など.
-          const parentsLen = parents.length
-          const parent: Parent = parents[parentsLen - 1]
-          const nodeIdx = parent.children.findIndex((n) => n === node)
+          const [, parent, nodeIdx] = decodeParents(parents, node)
 
           const up: string | undefined = d.attributes?.up
           const look: string | undefined = d.attributes?.look
@@ -241,9 +231,7 @@ export const remarkNumbers: Plugin<
         getRefernceFromLabel(node as TextDirective)
       if (ref) {
         // ref が指定されているときだけ.
-        const parentsLen = parents.length
-        const parent: Parent = parents[parentsLen - 1]
-        const nodeIdx = parent.children.findIndex((n) => n === node)
+        const [, parent, nodeIdx] = decodeParents(parents, node)
 
         // pre で確定した値を参照しテキストとして扱う.
         // 定義されていない場合はエラーメッセージ.
