@@ -178,6 +178,24 @@ export const remarkNumbers: Plugin<
           }
         }
 
+        const look: string | undefined = d.attributes?.look
+        if (look) {
+          // look が指定されているときは属性値で参照する(明示的な counter 変数の指定).
+          // label との組み合わせもある.
+          // 定義されていない場合はエラーメッセージ.
+          const [, parent, nodeIdx] = decodeParents(parents, node)
+
+          let replace: Text | undefined = undefined
+          const v = counter.look(look)
+          if (v !== undefined) {
+            replace = { type: 'text', value: `${v}` }
+          } else {
+            replace = errMessageNotDefined(look)
+          }
+          parent.children[nodeIdx] = replace
+          return SKIP
+        }
+
         const ref =
           getRefernceFromLabel(node as TextDirective, '%') || // 明示的に counter を指定する(まだテストしていない)
           getRefernceFromLabel(node as TextDirective)

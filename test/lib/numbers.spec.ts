@@ -41,11 +41,6 @@ describe('remarkNumbers() counter', () => {
       )
     ).toEqual('# test\n\n\n\n\n1\n\n1\n\n2\n\n3\n\n2\n')
   })
-  it('should lookup variable with prefix "%"', async () => {
-    expect(await f('# test\n\n:num{#foo reset}\n\n:num[%foo]{up}\n')).toEqual(
-      '# test\n\n\n\n1\n'
-    )
-  })
   it('should reset by reset container', async () => {
     expect(
       await f(
@@ -92,7 +87,27 @@ describe('remarkNumbers() counter', () => {
       )
     ).toEqual('# test\n\n\n\n1\n\n11\n\n2\n')
   })
+  it('should lookup variable with "look" attribute', async () => {
+    expect(await f('# test\n\n:num{#foo reset}\n\n:num{look=foo}\n')).toEqual(
+      '# test\n\n\n\n0\n'
+    )
+  })
+  it('should lookup variable with prefix "%"', async () => {
+    expect(await f('# test\n\n:num{#foo reset}\n\n:num[%foo]{up}\n')).toEqual(
+      '# test\n\n\n\n1\n'
+    )
+  })
   it('should insert a error message if the value is not defined', async () => {
+    expect(await f('# test\n\n:num{#foo reset}\n\n:num{look=bar}\n')).toEqual(
+      '# test\n\n\n\n(ReferenceError: "bar" is not defined)\n'
+    )
+    expect(
+      await f(
+        '# test\n\n:::num{increment counter}\n## :num{#chapter}\n:::\n## test1\n'
+      )
+    ).toEqual(
+      '# test\n\n(ReferenceError: "chapter" is not defined)\n\n## test1\n'
+    )
     expect(
       await f(
         '# test\n\n:num{#foo reset}\n\ns1:num[bar]{up}s2\n\ns3:num[car]{look}s4\n\ns5:num[baz]s6\n\n:num[foo]{up}\n'
