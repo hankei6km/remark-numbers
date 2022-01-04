@@ -48,26 +48,26 @@ export class Numbers {
   // numbers['fig.foo'] // fig series
   private numbers: Record<string, number> = {}
   constructor() {}
-  static getSeries(name: string): string {
-    const t: string[] = name.split('.', 2)
+  static getSeries(id: string): string {
+    const t: string[] = id.split('.', 2)
     if (t.length >= 2) {
       return t[0]
     }
     return ''
   }
-  define(name: string) {
+  define(id: string) {
     // seiries のカウンターを取得.
-    const s = Numbers.getSeries(name)
+    const s = Numbers.getSeries(id)
     if (this.counters[s] === undefined) {
       this.counters[s] = new DefineCounter()
       this.resetTrigger.forEach((t) => this.counters[s].addResetTrigger(t))
     }
     // series のカウンターで変数を定義.
     // 存在している場合は上書き.
-    this.numbers[name] = this.counters[s].up()
+    this.numbers[id] = this.counters[s].up()
   }
-  look(name: string): number | undefined {
-    return this.numbers[name]
+  look(id: string): number | undefined {
+    return this.numbers[id]
   }
   addResetTrigger(t: DefineCounterTrigger) {
     // ここでは定義を保存しておくだけ(add するときに設定する).
@@ -78,10 +78,10 @@ export class Numbers {
   }
 }
 
-export function errMessageNotDefined(name: string): Text {
+export function errMessageNotDefined(id: string): Text {
   return {
     type: 'text',
-    value: `(ReferenceError: "${name}" is not defined)`
+    value: `(ReferenceError: "${id}" is not defined)`
   }
 }
 
@@ -143,21 +143,21 @@ export const remarkNumbers: Plugin<
         (node as TextDirective).name === directiveName
       ) {
         const d = node as TextDirective
-        const name: string | undefined = d.attributes?.name
+        const id: string | undefined = d.attributes?.id
 
         const def: string | undefined = d.attributes?.define
 
-        if (name && def !== undefined) {
-          // 属性に name と define が指定されているときだけ.
+        if (id && def !== undefined) {
+          // 属性に id と define が指定されているときだけ.
           const parentsLen = parents.length
           const parent: Parent = parents[parentsLen - 1]
           const nodeIdx = parent.children.findIndex((n) => n === node)
 
           // def は def された回数を値として設定、そのまま値をテキストとして扱う.
-          numbers.define(name)
+          numbers.define(id)
           parent.children[nodeIdx] = {
             type: 'text',
-            value: `${numbers.look(name)}`
+            value: `${numbers.look(id)}`
           }
           return nodeIdx
         }
@@ -166,21 +166,21 @@ export const remarkNumbers: Plugin<
 
     const visitorPost = (node: Node, parents: Parent[]) => {
       const d = node as TextDirective
-      const name: string | undefined = d.attributes?.name
+      const id: string | undefined = d.attributes?.id
 
-      if (name) {
-        // name 属性が指定されているときだけ.
+      if (id) {
+        // id 属性が指定されているときだけ.
         const parentsLen = parents.length
         const parent: Parent = parents[parentsLen - 1]
         const nodeIdx = parent.children.findIndex((n) => n === node)
 
         // pre で確定した値を参照しテキストとして扱う.
         // 定義されていない場合はエラーメッセージ.
-        const v = numbers.look(name)
+        const v = numbers.look(id)
         if (v !== undefined) {
           parent.children[nodeIdx] = { type: 'text', value: `${v}` }
         } else {
-          parent.children[nodeIdx] = errMessageNotDefined(name)
+          parent.children[nodeIdx] = errMessageNotDefined(id)
         }
 
         return nodeIdx
