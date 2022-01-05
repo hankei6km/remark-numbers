@@ -1,16 +1,35 @@
 import { Plugin, Transformer } from 'unified'
 import { Node } from 'unist'
 import { Parent, Root, Text } from 'mdast'
+import { fromMarkdown } from 'mdast-util-from-markdown'
+import { directive } from 'micromark-extension-directive'
+import { directiveFromMarkdown } from 'mdast-util-directive'
 import { TextDirective, ContainerDirective } from 'mdast-util-directive'
 import { visitParents, SKIP } from 'unist-util-visit-parents'
 import toSafeInteger from 'lodash.tosafeinteger'
 import { Assign } from './assign.js'
 import { Counter } from './counter.js'
-import { decodeParents, getRefernceFromLabel } from './util.js'
+import { decodeParents, getRefernceFromLabel, normalizeOpts } from './util.js'
 
 const directiveName = 'num'
 
-export type RemarkNumbersOptions = {}
+export type RemarkNumbersOptions = { template?: string }
+export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
+  template: `
+:::num{reset counter}
+# :num{#sec}
+## :num{#subsec}
+:::
+:::num{increment counter}
+## :num{#sec}
+### :num{#subsec}
+:::
+:::num{reset assign}
+## :num
+:::
+` // とりあえず.
+}
+
 export function errMessageNotDefined(id: string): Text {
   return {
     type: 'text',
@@ -22,7 +41,25 @@ export const remarkNumbers: Plugin<
   [RemarkNumbersOptions] | [RemarkNumbersOptions[]] | [],
   string,
   Root
-> = function remarkNumbers(): Transformer {
+> = function remarkNumbers(
+  opts?: RemarkNumbersOptions | RemarkNumbersOptions[]
+): Transformer {
+  const nopts = normalizeOpts(opts)
+
+  // template をパース.
+  // extension は directive のみ(gfm などは必要ないと思う).
+  const templates: string[] = nopts
+    .filter(({ template }) => template)
+    .map(({ template }) =>
+      JSON.stringify(
+        // 今回はこれで対応できると思う.
+        fromMarkdown(template, {
+          extensions: [directive()],
+          mdastExtensions: [directiveFromMarkdown]
+        })
+      )
+    )
+
   // 事前処理(reset などの定義)用.
   const visitTestCounterPre = (node: Node) => {
     if (
@@ -263,6 +300,13 @@ export const remarkNumbers: Plugin<
         return nodeIdx
       }
     }
+
+    templates.forEach((template) => {
+      const tree = JSON.parse(template)
+      // template で前処理
+      visitParents(tree, visitTestCounterPre, visitorCounterPre)
+      visitParents(tree, visitTestAssignPre, visitorAssignPre)
+    })
 
     // 前処理、reset の設定などが実行される
     visitParents(tree, visitTestCounterPre, visitorCounterPre)

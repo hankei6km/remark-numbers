@@ -1,6 +1,28 @@
 import { Node } from 'unist'
 import { Parent } from 'mdast'
 import { TextDirective } from 'mdast-util-directive'
+import { remarkNumbersOptionsDefault, RemarkNumbersOptions } from './numbers.js'
+
+function _normalizeOpts(
+  opts: RemarkNumbersOptions
+): Required<RemarkNumbersOptions> {
+  return {
+    template:
+      opts.template !== undefined
+        ? opts.template
+        : remarkNumbersOptionsDefault.template
+  }
+}
+
+export function normalizeOpts(
+  opts?: RemarkNumbersOptions | RemarkNumbersOptions[]
+): Required<RemarkNumbersOptions>[] {
+  if (Array.isArray(opts)) {
+    return opts.map((v) => _normalizeOpts(v))
+  } else {
+    return [_normalizeOpts(opts || {})]
+  }
+}
 
 export function decodeParents(
   parents: Parent[],
