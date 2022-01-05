@@ -36,6 +36,7 @@
     "lodash.tosafeinteger": "^4.0.4",
     "mdast-util-directive": "^2.2.0",
     "mdast-util-from-markdown": "^1.2.0",
+    "mdast-util-to-markdown": "^1.2.6",
     "micromark-extension-directive": "^2.1.1",
     "unified": "^10.1.1",
     "unist-util-visit-parents": "^5.1.0"

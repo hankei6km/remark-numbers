@@ -479,6 +479,129 @@ fig 1
 112
 `)
   })
+  it('should apply format to variables', async () => {
+    expect(
+      await f(
+        `# test
+
+:::num{reset counter}
+# :num{#cnt}
+:::
+:::num{increment counter}
+## :num{#cnt}
+:::
+
+## test 1
+
+:::num{format assign}
+:num[test-1 :num[cnt]-:num --]{series=t1}
+:num[test-2 :num[cnt]-:num --]{series=t2}
+:::
+
+:num{#t1-foo}
+:num{#t1-bar}
+:num{#t2-foo}
+:num{#t2-bar}
+
+## test 2
+
+:num{#t1-car}
+:num{#t1-baz}
+:num{#t2-car}
+:num{#t2-baz}
+
+:num[t1-foo]
+:num[t1-bar]
+:num[t1-car]
+:num[t1-baz]
+
+:num[t2-foo]:num[t2-bar]
+:num[t2-car]:num[t2-baz]
+`
+      )
+    ).toEqual(`# test
+
+## test 1
+
+test-1 1-1 --
+test-1 1-2 --
+test-2 1-1 --
+test-2 1-2 --
+
+## test 2
+
+test-1 2-1 --
+test-1 2-2 --
+test-2 2-1 --
+test-2 2-2 --
+
+test-1 1-1 --
+test-1 1-2 --
+test-1 2-1 --
+test-1 2-2 --
+
+test-2 1-1 --test-2 1-2 --
+test-2 2-1 --test-2 2-2 --
+`)
+  })
+  it('should insert a error message into formated value if the counter is not defined', async () => {
+    expect(
+      await f(
+        `# test
+
+## test 1
+
+:::num{format assign}
+:num[test-1 :num[cnt]-:num --]{series=t1}
+:num[test-2 :num[cnt]-:num --]{series=t2}
+:::
+
+:num{#t1-foo}
+:num{#t1-bar}
+:num{#t2-foo}
+:num{#t2-bar}
+
+## test 2
+
+:num{#t1-car}
+:num{#t1-baz}
+:num{#t2-car}
+:num{#t2-baz}
+
+:num[t1-foo]
+:num[t1-bar]
+:num[t1-car]
+:num[t1-baz]
+
+:num[t2-foo]:num[t2-bar]
+:num[t2-car]:num[t2-baz]
+`
+      )
+    ).toEqual(`# test
+
+## test 1
+
+test-1 (ReferenceError: "cnt" is not defined)-1 --
+test-1 (ReferenceError: "cnt" is not defined)-2 --
+test-2 (ReferenceError: "cnt" is not defined)-1 --
+test-2 (ReferenceError: "cnt" is not defined)-2 --
+
+## test 2
+
+test-1 (ReferenceError: "cnt" is not defined)-1 --
+test-1 (ReferenceError: "cnt" is not defined)-2 --
+test-2 (ReferenceError: "cnt" is not defined)-1 --
+test-2 (ReferenceError: "cnt" is not defined)-2 --
+
+test-1 (ReferenceError: "cnt" is not defined)-1 --
+test-1 (ReferenceError: "cnt" is not defined)-2 --
+test-1 (ReferenceError: "cnt" is not defined)-1 --
+test-1 (ReferenceError: "cnt" is not defined)-2 --
+
+test-2 (ReferenceError: "cnt" is not defined)-1 --test-2 (ReferenceError: "cnt" is not defined)-2 --
+test-2 (ReferenceError: "cnt" is not defined)-1 --test-2 (ReferenceError: "cnt" is not defined)-2 --
+`)
+  })
   it('should increment counter by "define"', async () => {
     expect(
       await f(`# test
