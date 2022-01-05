@@ -12,7 +12,7 @@ const f = async (
     unified()
       .use(remarkParse)
       .use(remarkDirective)
-      .use(remarkNumbers)
+      .use(remarkNumbers, opts || {})
       .use(remarkStringify)
       .freeze()
       .process(html, (err, file) => {
@@ -726,6 +726,202 @@ describe('remarkNumbers() mix', () => {
 
 1
 1
+`)
+  })
+})
+
+describe('remarkNumbers() opts.template', () => {
+  it('should reset counter and by default template', async () => {
+    expect(
+      await f(
+        `# test
+## test 1
+
+:num[sec]
+
+### test 1-1
+
+:num[sec]-:num[subsec]
+
+### test 1-2
+
+:num[sec]-:num[subsec]
+
+## test 2
+
+:num[sec]
+
+### test 1-1
+
+:num[sec]-:num[subsec]
+`
+      )
+    ).toEqual(`# test
+
+## test 1
+
+1
+
+### test 1-1
+
+1-1
+
+### test 1-2
+
+1-2
+
+## test 2
+
+2
+
+### test 1-1
+
+2-1
+`)
+  })
+  it('should reset assign and by default template', async () => {
+    expect(
+      await f(
+        `# test
+
+## test 1
+
+:num{#foo}
+
+:num{#bar}
+
+:num[foo]:num[bar]
+
+## test 2
+
+:num{#car}
+
+:num[foo]:num[bar]:num[car]
+`
+      )
+    ).toEqual(`# test
+
+## test 1
+
+1
+
+2
+
+12
+
+## test 2
+
+1
+
+121
+`)
+  })
+  it('should use passed template', async () => {
+    expect(
+      await f(
+        `# test
+
+## test 1
+
+:num[cnt1]
+
+### test 1-1
+
+:num{#foo}:num{#bar}
+
+### test 1-2
+
+:num{#car}
+
+:num[foo]:num[bar]:num[car]
+`,
+        {
+          template: `
+:::num{reset counter}
+# :num{#cnt1}
+:::
+:::num{increment counter}
+## :num{#cnt1}
+:::
+:::num{reset assign}
+## :num
+### :num
+:::
+`
+        }
+      )
+    ).toEqual(`# test
+
+## test 1
+
+1
+
+### test 1-1
+
+12
+
+### test 1-2
+
+1
+
+121
+`)
+  })
+  it('should use passed templates(multiple)', async () => {
+    expect(
+      await f(
+        `# test
+
+## test 1
+
+:num[cnt1]
+
+### test 1-1
+
+:num{#foo}:num{#bar}
+
+### test 1-2
+
+:num{#car}
+
+:num[foo]:num[bar]:num[car]
+`,
+        [
+          {
+            template: `
+:::num{reset counter}
+# :num{#cnt1}
+:::
+`
+          },
+          {
+            template: `
+:::num{increment counter}
+## :num{#cnt1}
+:::
+:::num{reset assign}
+## :num
+### :num
+:::
+`
+          }
+        ]
+      )
+    ).toEqual(`# test
+
+## test 1
+
+1
+
+### test 1-1
+
+12
+
+### test 1-2
+
+1
+
+121
 `)
   })
 })

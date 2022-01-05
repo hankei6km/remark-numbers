@@ -1,5 +1,33 @@
 import { TextDirective } from 'mdast-util-directive'
-import { getRefernceFromLabel } from '../../src/lib/util'
+import { remarkNumbersOptionsDefault } from '../../src/lib/numbers.js'
+import { getRefernceFromLabel, normalizeOpts } from '../../src/lib/util.js'
+
+describe('normalizeOpts()', () => {
+  it('should set default', () => {
+    expect(normalizeOpts()).toEqual([remarkNumbersOptionsDefault])
+    expect(normalizeOpts({})).toEqual([remarkNumbersOptionsDefault])
+  })
+  it('should use passed fields', () => {
+    expect(normalizeOpts({ template: '' })).toEqual([{ template: '' }])
+    expect(normalizeOpts({ template: 'test' })).toEqual([
+      {
+        template: 'test'
+      }
+    ])
+  })
+  it('should use passed fields(array)', () => {
+    expect(
+      normalizeOpts([{ template: 'test1' }, { template: 'test2' }])
+    ).toEqual([
+      {
+        template: 'test1'
+      },
+      {
+        template: 'test2'
+      }
+    ])
+  })
+})
 
 describe('getRefernceFromLabel()', () => {
   it('should get reference name from text directive', () => {
