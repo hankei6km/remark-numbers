@@ -28,104 +28,398 @@ describe('remarkNumbers() counter', () => {
   it('should assign the value by "reset"', async () => {
     expect(
       await f(
-        '# test\n\ns1\n:num{#fig reset}\ns2\n\n## test1\n\n![fig1](/images/fig1.png)\n*fig :num[fig]{up}*\n'
+        `# test
+s1
+:num{#fig reset}
+s2
+## test1
+![fig1](/images/fig1.png)
+*fig :num[fig]{up}*
+`
       )
     ).toEqual(
-      '# test\n\ns1\n\ns2\n\n## test1\n\n![fig1](/images/fig1.png)\n*fig 1*\n'
+      `# test
+
+s1
+
+s2
+
+## test1
+
+![fig1](/images/fig1.png)
+*fig 1*
+`
     )
   })
   it('should assign the value by "reset"(multiple)', async () => {
     expect(
       await f(
-        '# test\n\n:num{#foo reset}\n:num{#bar reset}\n\n:num[foo]{up}\n\n:num[bar]{up}\n\n:num[bar]{up}\n\n:num[bar]{up}\n\n:num[foo]{up}\n'
+        `# test
+:num{#foo reset}
+:num{#bar reset}
+:num[foo]{up}
+:num[bar]{up}
+:num[bar]{up}
+:num[bar]{up}
+:num[foo]{up}
+`
       )
-    ).toEqual('# test\n\n\n\n\n1\n\n1\n\n2\n\n3\n\n2\n')
+    ).toEqual(`# test
+
+
+
+1
+1
+2
+3
+2
+`)
   })
   it('should reset by reset container', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset counter}\n## :num{#foo}\n## :num{#bar}\n### :num{#bar}\n:::\n\n## head2-1\n\n:num[foo]{up}:num[bar]{up}\n\n### head3-1\n\n:num[foo]{up}:num[bar]{up}\n\n## head2-2\n\n:num[foo]{up}:num[bar]{up}\n'
+        `# test
+
+:::num{reset counter}
+## :num{#foo}
+## :num{#bar}
+### :num{#bar}
+:::
+
+## head2-1
+
+:num[foo]{up}:num[bar]{up}
+
+### head3-1
+
+:num[foo]{up}:num[bar]{up}
+
+## head2-2
+
+:num[foo]{up}:num[bar]{up}
+`
       )
     ).toEqual(
-      '# test\n\n## head2-1\n\n11\n\n### head3-1\n\n21\n\n## head2-2\n\n11\n'
+      `# test
+
+## head2-1
+
+11
+
+### head3-1
+
+21
+
+## head2-2
+
+11
+`
     )
   })
   it('should increment values by increment container', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset counter}\n:num{#chapter}\n:::\n:::num{increment counter}\n## :num{#chapter}\n:::\n\n## test 1\n\n:num[chapter]\n\n### test1-1\n\n:num[chapter]\n\n## test2\n\n:num[chapter]\n'
+        `# test
+
+:::num{reset counter}
+:num{#chapter}
+:::
+:::num{increment counter}
+## :num{#chapter}
+:::
+
+## test 1
+
+:num[chapter]
+
+### test1-1
+
+:num[chapter]
+
+## test2
+
+:num[chapter]
+`
       )
-    ).toEqual('# test\n\n## test 1\n\n1\n\n### test1-1\n\n1\n\n## test2\n\n2\n')
+    ).toEqual(`# test
+
+## test 1
+
+1
+
+### test1-1
+
+1
+
+## test2
+
+2
+`)
   })
   it('should skip incremental by deeper heading', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset counter}\n:num{#chapter}\n:::\n:::num{increment counter}\n## :num{#chapter}\n:::\n:::tmp{reset}\n## :tmp\n:::\n## test 1\n\n:num[chapter]\n\n### test1-1\n\n:num[chapter]\n\n## test2\n\n:num[chapter]\n'
+        `# test
+
+:::num{reset counter}
+:num{#chapter}
+:::
+:::num{increment counter}
+## :num{#chapter}
+:::
+:::tmp{reset}
+## :tmp
+:::
+## test 1
+
+:num[chapter]
+
+### test1-1
+
+:num[chapter]
+
+## test2
+
+:num[chapter]
+`
       )
     ).toEqual(
-      '# test\n\n:::tmp{reset}\n## :tmp\n:::\n\n## test 1\n\n1\n\n### test1-1\n\n1\n\n## test2\n\n2\n'
+      `# test
+
+:::tmp{reset}
+## :tmp
+:::
+
+## test 1
+
+1
+
+### test1-1
+
+1
+
+## test2
+
+2
+`
     )
   })
   it('should set values by "reset"', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset counter}\n:num{#chapter}\n:::\n:::num{increment counter}\n## :num{#chapter}\n:::\n:num{#chapter reset=10}\n\n## test 1\n\n:num[chapter]\n\n### test1-1\n\n:num[chapter]\n\n## test2\n\n:num[chapter]\n'
+        `# test
+
+:::num{reset counter}
+:num{#chapter}
+:::
+:::num{increment counter}
+## :num{#chapter}
+:::
+:num{#chapter reset=10}
+
+## test 1
+
+:num[chapter]
+
+### test1-1
+
+:num[chapter]
+
+## test2
+
+:num[chapter]
+`
       )
     ).toEqual(
-      '# test\n\n\n\n## test 1\n\n11\n\n### test1-1\n\n11\n\n## test2\n\n12\n'
+      `# test
+
+
+
+## test 1
+
+11
+
+### test1-1
+
+11
+
+## test2
+
+12
+`
     )
   })
   it('should increment the value by "up"', async () => {
     expect(
-      await f('# test\n\n:num{#fig reset}\n\n:num[fig]{up}\n\n:num[fig]{up}\n')
-    ).toEqual('# test\n\n\n\n1\n\n2\n')
+      await f(`# test
+
+:num{#fig reset}
+
+:num[fig]{up}
+
+:num[fig]{up}
+`)
+    ).toEqual(`# test
+
+
+
+1
+
+2
+`)
   })
   it('should lookup variable', async () => {
     expect(
       await f(
-        '# test\n\n:num{#foo reset}\n\n:num[foo]{up}\n\n:num[foo]{look}:num[foo]\n\n:num[foo]{up}\n'
+        `# test
+
+:num{#foo reset}
+
+:num[foo]{up}
+
+:num[foo]{look}:num[foo]
+
+:num[foo]{up}
+`
       )
-    ).toEqual('# test\n\n\n\n1\n\n11\n\n2\n')
+    ).toEqual(`# test
+
+
+
+1
+
+11
+
+2
+`)
   })
   it('should lookup variable with "look" attribute', async () => {
-    expect(await f('# test\n\n:num{#foo reset}\n\n:num{look=foo}\n')).toEqual(
-      '# test\n\n\n\n0\n'
+    expect(
+      await f(`# test
+
+:num{#foo reset}
+
+:num{look=foo}
+`)
+    ).toEqual(
+      `# test
+
+
+
+0
+`
     )
   })
   it('should lookup variable with prefix "%"', async () => {
-    expect(await f('# test\n\n:num{#foo reset}\n\n:num[%foo]{up}\n')).toEqual(
-      '# test\n\n\n\n1\n'
+    expect(
+      await f(`# test
+
+:num{#foo reset}
+
+:num[%foo]{up}
+`)
+    ).toEqual(
+      `# test
+
+
+
+1
+`
     )
   })
   it('should insert a error message if the value is not defined', async () => {
-    expect(await f('# test\n\n:num{#foo reset}\n\n:num{look=bar}\n')).toEqual(
-      '# test\n\n\n\n(ReferenceError: "bar" is not defined)\n'
+    expect(
+      await f(`# test
+
+:num{#foo reset}
+
+:num{look=bar}
+`)
+    ).toEqual(
+      `# test
+
+
+
+(ReferenceError: "bar" is not defined)
+`
     )
     expect(
       await f(
-        '# test\n\n:::num{increment counter}\n## :num{#chapter}\n:::\n## test1\n'
+        `# test
+
+:::num{increment counter}
+## :num{#chapter}
+:::
+## test1
+`
       )
     ).toEqual(
-      '# test\n\n(ReferenceError: "chapter" is not defined)\n\n## test1\n'
+      `# test
+
+(ReferenceError: "chapter" is not defined)
+
+## test1
+`
     )
     expect(
       await f(
-        '# test\n\n:num{#foo reset}\n\ns1:num[bar]{up}s2\n\ns3:num[car]{look}s4\n\ns5:num[baz]s6\n\n:num[foo]{up}\n'
+        `# test
+
+:num{#foo reset}
+
+s1:num[bar]{up}s2
+
+s3:num[car]{look}s4
+
+s5:num[baz]s6
+
+:num[foo]{up}
+`
       )
     ).toEqual(
-      '# test\n\n\n\ns1(ReferenceError: "bar" is not defined)s2\n\ns3(ReferenceError: "car" is not defined)s4\n\ns5(ReferenceError: "baz" is not defined)s6\n\n1\n'
+      `# test
+
+
+
+s1(ReferenceError: "bar" is not defined)s2
+
+s3(ReferenceError: "car" is not defined)s4
+
+s5(ReferenceError: "baz" is not defined)s6
+
+1
+`
     )
     expect(
       await f(
-        '# test\n\n:::num{increment counter}\n## :num{#chapter}\n:::\n## test1\n'
+        `# test
+
+:::num{increment counter}
+## :num{#chapter}
+:::
+## test1
+`
       )
     ).toEqual(
-      '# test\n\n(ReferenceError: "chapter" is not defined)\n\n## test1\n'
+      `# test
+
+(ReferenceError: "chapter" is not defined)
+
+## test1
+`
     )
   })
   it('should escape varble name in error message', async () => {
-    expect(await f('# test\n\ns1:num[[bar]]s2\n')).toEqual(
-      '# test\n\ns1(ReferenceError: "\\[bar]" is not defined)s2\n'
+    expect(
+      await f(`# test
+
+s1:num[[bar]]s2
+`)
+    ).toEqual(
+      `# test
+
+s1(ReferenceError: "\\[bar]" is not defined)s2
+`
     )
   })
 })
@@ -134,71 +428,274 @@ describe('remarkNumbers() assign', () => {
   it('should define the value', async () => {
     expect(
       await f(
-        '# test\n\ns1\n\n![fig1](/images/fig1.png)\n*fig :num{#fig}*\n\ns2\n\n## test1\n\nfig :num[fig]\n'
+        `# test
+
+s1
+
+![fig1](/images/fig1.png)
+*fig :num{#fig}*
+
+s2
+
+## test1
+
+fig :num[fig]
+`
       )
     ).toEqual(
-      '# test\n\ns1\n\n![fig1](/images/fig1.png)\n*fig 1*\n\ns2\n\n## test1\n\nfig 1\n'
+      `# test
+
+s1
+
+![fig1](/images/fig1.png)
+*fig 1*
+
+s2
+
+## test1
+
+fig 1
+`
     )
   })
   it('should define the value with series', async () => {
     expect(
       await f(
-        '# test\n\n:num{#fig-foo}:num{#tbl-foo}:num{#fig-bar}\n\n## test1\n\n:num[fig-foo]:num[tbl-foo]:num[fig-bar]\n'
+        `# test
+
+:num{#fig-foo}:num{#tbl-foo}:num{#fig-bar}
+
+## test1
+
+:num[fig-foo]:num[tbl-foo]:num[fig-bar]
+`
       )
-    ).toEqual('# test\n\n112\n\n## test1\n\n112\n')
+    ).toEqual(`# test
+
+112
+
+## test1
+
+112
+`)
   })
   it('should increment counter by "define"', async () => {
     expect(
-      await f('# test\n\n:num{#foo}\n\n:num{#bar}\n\n:num{#car}\n')
-    ).toEqual('# test\n\n1\n\n2\n\n3\n')
+      await f(`# test
+
+:num{#foo}
+
+:num{#bar}
+
+:num{#car}
+`)
+    ).toEqual(`# test
+
+1
+
+2
+
+3
+`)
   })
   it('should lookup variable with prefix "$"', async () => {
     expect(
-      await f('# test\n\n:num{#foo}\n\n:num{#bar}\n\n:num[$bar]\n')
-    ).toEqual('# test\n\n1\n\n2\n\n2\n')
+      await f(`# test
+
+:num{#foo}
+
+:num{#bar}
+
+:num[$bar]
+`)
+    ).toEqual(`# test
+
+1
+
+2
+
+2
+`)
   })
   it('should lookup variable that is define at post', async () => {
     expect(
-      await f('# test\n\n:num{#foo}\n\n:num[car]\n\n:num{#bar}\n\n:num{#car}\n')
-    ).toEqual('# test\n\n1\n\n3\n\n2\n\n3\n')
+      await f(`# test
+
+:num{#foo}
+
+:num[car]
+
+:num{#bar}
+
+:num{#car}
+`)
+    ).toEqual(`# test
+
+1
+
+3
+
+2
+
+3
+`)
   })
   it('should insert a error message if the value is not defined', async () => {
     expect(
-      await f('# test\n\n:num{#foo}\n\ns1:num[bar]s2\n\n:num[foo]\n')
+      await f(`# test
+
+:num{#foo}
+
+s1:num[bar]s2
+
+:num[foo]
+`)
     ).toEqual(
-      '# test\n\n1\n\ns1(ReferenceError: "bar" is not defined)s2\n\n1\n'
+      `# test
+
+1
+
+s1(ReferenceError: "bar" is not defined)s2
+
+1
+`
     )
   })
   it('should reset by reset container', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset assign}\n## :num\n:::\n\n## head2-1\n\n:num{#foo}\n\n:num{#bar}\n\n## head2-2\n\n:num{#car}\n\n## head2-3\n\n:num[foo]:num[bar]:num[car]\n'
+        `# test
+
+:::num{reset assign}
+## :num
+:::
+
+## head2-1
+
+:num{#foo}
+
+:num{#bar}
+
+## head2-2
+
+:num{#car}
+
+## head2-3
+
+:num[foo]:num[bar]:num[car]
+`
       )
     ).toEqual(
-      '# test\n\n## head2-1\n\n1\n\n2\n\n## head2-2\n\n1\n\n## head2-3\n\n121\n'
+      `# test
+
+## head2-1
+
+1
+
+2
+
+## head2-2
+
+1
+
+## head2-3
+
+121
+`
     )
   })
   it('should skip resetting counter by deeper heading', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset assign}\n## :num\n:::\n\n## head2-1\n\n:num{#foo}\n\n:::cnt{reset}\n## :cnt{#chapter}\n:::\n\n:num{#bar}\n\n:num[foo]:num[bar]'
+        `# test
+
+:::num{reset assign}
+## :num
+:::
+
+## head2-1
+
+:num{#foo}
+
+:::cnt{reset}
+## :cnt{#chapter}
+:::
+
+:num{#bar}
+
+:num[foo]:num[bar]`
       )
     ).toEqual(
-      '# test\n\n## head2-1\n\n1\n\n:::cnt{reset}\n## :cnt{#chapter}\n:::\n\n2\n\n12\n'
+      `# test
+
+## head2-1
+
+1
+
+:::cnt{reset}
+## :cnt{#chapter}
+:::
+
+2
+
+12
+`
     )
   })
   it('should reset by reset container(series)', async () => {
     expect(
       await f(
-        '# test\n\n:::num{reset assign}\n## :num\n:::\n\n## head2-1\n\n:num{#fig-foo}\n\n:num{#fig-bar}\n\n## head2-2\n\n:num{#fig-car}\n\n## head2-3\n\n:num[fig-foo]:num[fig-bar]:num[fig-car]\n'
+        `# test
+
+:::num{reset assign}
+## :num
+:::
+
+## head2-1
+
+:num{#fig-foo}
+
+:num{#fig-bar}
+
+## head2-2
+
+:num{#fig-car}
+
+## head2-3
+
+:num[fig-foo]:num[fig-bar]:num[fig-car]
+`
       )
     ).toEqual(
-      '# test\n\n## head2-1\n\n1\n\n2\n\n## head2-2\n\n1\n\n## head2-3\n\n121\n'
+      `# test
+
+## head2-1
+
+1
+
+2
+
+## head2-2
+
+1
+
+## head2-3
+
+121
+`
     )
   })
   it('should escape varble name in error message', async () => {
-    expect(await f('# test\n\ns1:num[[bar]]s2\n')).toEqual(
-      '# test\n\ns1(ReferenceError: "\\[bar]" is not defined)s2\n'
+    expect(
+      await f(`# test
+
+s1:num[[bar]]s2
+`)
+    ).toEqual(
+      `# test
+
+s1(ReferenceError: "\\[bar]" is not defined)s2
+`
     )
   })
 })
@@ -207,8 +704,28 @@ describe('remarkNumbers() mix', () => {
   it('should reset variables for counter and assign independently', async () => {
     expect(
       await f(
-        '# test\n:::num{reset counter}\n:num{#foo}\n:::\n:::num{reset assign}\n## :num\n:::\n:num{#bar}:num{#car}\n## test2-1\n\n:num[foo]{up}\n:num{#baz}\n'
+        `# test
+:::num{reset counter}
+:num{#foo}
+:::
+:::num{reset assign}
+## :num
+:::
+:num{#bar}:num{#car}
+## test2-1
+
+:num[foo]{up}
+:num{#baz}
+`
       )
-    ).toEqual('# test\n\n12\n\n## test2-1\n\n1\n1\n')
+    ).toEqual(`# test
+
+12
+
+## test2-1
+
+1
+1
+`)
   })
 })
