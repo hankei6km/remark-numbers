@@ -139,30 +139,34 @@ export class Assign {
   // counters のフィールド名は series のみで指定される.
   // counters[''].up()  // global
   // counters['fig'].up() // fig
-  private series: Record<string, Series> = {}
+  private _series: Record<string, Series> = {}
   private resetTrigger: AssignCounterTrigger[] = []
   // numbers のフィールド名は series 込みで指定される.
   // numbers['foo'] // global series
   // numbers['fig.foo'] // fig series
   private numbers: Record<string, string> = {}
   constructor() {}
-  static getSeries(id: string): string {
+  static getSeriesName(id: string): string {
     const t: string[] = id.split('-', 2)
     if (t.length >= 2) {
       return t[0]
     }
     return ''
   }
-  define(id: string, counter: Counter): string {
-    const s = Assign.getSeries(id)
-    if (this.series[s] === undefined) {
-      this.series[s] = new Series(s)
-      this.resetTrigger.forEach((t) => this.series[s].addResetTrigger(t))
+  private getSeries(seriesName: string): Series {
+    if (this._series[seriesName] === undefined) {
+      this._series[seriesName] = new Series(seriesName)
+      this.resetTrigger.forEach((t) =>
+        this._series[seriesName].addResetTrigger(t)
+      )
     }
-
+    return this._series[seriesName]
+  }
+  define(id: string, counter: Counter): string {
+    const s = this.getSeries(Assign.getSeriesName(id))
     // 存在している場合は上書き.
     // format は Counter class に含める方がよいか?
-    this.numbers[id] = formatLook(this.series[s].formattedUp(), counter)
+    this.numbers[id] = formatLook(s.formattedUp(), counter)
     return this.numbers[id]
   }
   look(id: string): string | undefined {
@@ -173,16 +177,11 @@ export class Assign {
     this.resetTrigger.push({ type: t.type, depth: t.depth })
   }
   reset(node: Node, parents: Parent[]) {
-    Object.values(this.series).forEach((v) => v.reset(node, parents))
+    Object.values(this._series).forEach((v) => v.reset(node, parents))
   }
   setFormat(seriesName: string, formatLabel: Node[]) {
     // seiries を取得.
-    if (this.series[seriesName] === undefined) {
-      this.series[seriesName] = new Series(seriesName)
-      this.resetTrigger.forEach((t) =>
-        this.series[seriesName].addResetTrigger(t)
-      )
-    }
-    this.series[seriesName].setFormat(formatLabel)
+    const s = this.getSeries(seriesName)
+    s.setFormat(formatLabel)
   }
 }
