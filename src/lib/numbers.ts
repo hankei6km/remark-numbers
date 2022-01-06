@@ -35,6 +35,9 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 :num[:num[sec]-:num]{series=fig}
 :num[:num[sec]-:num]{series=photo}
 :num[:num[sec]-:num]{series=chart}
+:num[:num[sec]-:num]{series=graph}
+:num[:num[sec]-:num]{series=diagram}
+:num[:num[sec]-:num]{series=flow}
 :num[:num[sec]-:num]{series=tbl}
 :::
 `
