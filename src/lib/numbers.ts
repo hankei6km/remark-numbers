@@ -27,6 +27,12 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 :::num{reset assign}
 ## :num
 :::
+:::num{format assign}
+:num[:num[sec]-:num]{series=fig}
+:num[:num[sec]-:num]{series=photo}
+:num[:num[sec]-:num]{series=chart}
+:num[:num[sec]-:num]{series=tbl}
+:::
 ` // とりあえず.
 }
 

@@ -463,11 +463,11 @@ fig 1
       await f(
         `# test
 
-:num{#fig-foo}:num{#tbl-foo}:num{#fig-bar}
+:num{#test1-foo}:num{#test2-foo}:num{#test1-bar}
 
 ## test1
 
-:num[fig-foo]:num[tbl-foo]:num[fig-bar]
+:num[test1-foo]:num[test2-foo]:num[test1-bar]
 `
       )
     ).toEqual(`# test
@@ -776,17 +776,17 @@ s1(ReferenceError: "bar" is not defined)s2
 
 ## head2-1
 
-:num{#fig-foo}
+:num{#test1-foo}
 
-:num{#fig-bar}
+:num{#test1-bar}
 
 ## head2-2
 
-:num{#fig-car}
+:num{#test1-car}
 
 ## head2-3
 
-:num[fig-foo]:num[fig-bar]:num[fig-car]
+:num[test1-foo]:num[test1-bar]:num[test1-car]
 `
       )
     ).toEqual(
