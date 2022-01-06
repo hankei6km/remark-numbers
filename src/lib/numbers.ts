@@ -13,9 +13,13 @@ import { decodeParents, getRefernceFromLabel, normalizeOpts } from './util.js'
 
 export const directiveName = 'num'
 
-export type RemarkNumbersOptions = { template?: string }
+export type RemarkNumbersOptions = {
+  template?: string[]
+  keepDefaultTemplate?: boolean
+}
 export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
-  template: `
+  template: [
+    `
 :::num{reset counter}
 # :num{#sec}
 ## :num{#subsec}
@@ -33,7 +37,9 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 :num[:num[sec]-:num]{series=chart}
 :num[:num[sec]-:num]{series=tbl}
 :::
-` // とりあえず.
+`
+  ],
+  keepDefaultTemplate: false
 }
 
 export function errMessageNotDefined(id: string): Text {
@@ -50,13 +56,17 @@ export const remarkNumbers: Plugin<
 > = function remarkNumbers(
   opts?: RemarkNumbersOptions | RemarkNumbersOptions[]
 ): Transformer {
-  const nopts = normalizeOpts(opts)
+  const nopts = normalizeOpts(opts)[0]
 
   // template をパース.
   // extension は directive のみ(gfm などは必要ないと思う).
-  const templates: string[] = nopts
-    .filter(({ template }) => template)
-    .map(({ template }) =>
+  const templates: string[] = (
+    nopts.keepDefaultTemplate
+      ? remarkNumbersOptionsDefault.template.concat(nopts.template)
+      : nopts.template
+  )
+    .filter((template) => template)
+    .map((template) =>
       JSON.stringify(
         // 今回はこれで対応できると思う.
         fromMarkdown(template, {

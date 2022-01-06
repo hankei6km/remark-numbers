@@ -959,7 +959,8 @@ describe('remarkNumbers() opts.template', () => {
 :num[foo]:num[bar]:num[car]
 `,
         {
-          template: `
+          template: [
+            `
 :::num{reset counter}
 # :num{#cnt1}
 :::
@@ -971,6 +972,7 @@ describe('remarkNumbers() opts.template', () => {
 ### :num
 :::
 `
+          ]
         }
       )
     ).toEqual(`# test
@@ -1009,16 +1011,14 @@ describe('remarkNumbers() opts.template', () => {
 
 :num[foo]:num[bar]:num[car]
 `,
-        [
-          {
-            template: `
+
+        {
+          template: [
+            `
 :::num{reset counter}
 # :num{#cnt1}
-:::
-`
-          },
-          {
-            template: `
+:::`,
+            `
 :::num{increment counter}
 ## :num{#cnt1}
 :::
@@ -1027,8 +1027,62 @@ describe('remarkNumbers() opts.template', () => {
 ### :num
 :::
 `
-          }
-        ]
+          ]
+        }
+      )
+    ).toEqual(`# test
+
+## test 1
+
+1
+
+### test 1-1
+
+12
+
+### test 1-2
+
+1
+
+121
+`)
+  })
+  it('should use passed template with default template', async () => {
+    expect(
+      await f(
+        `# test
+
+## test :num[sec]
+
+:num[cnt1]
+
+### test :num[sec]-:num[subsec]
+
+:num{#foo}:num{#bar}
+
+### test :num[sec]-:num[subsec]
+
+:num{#car}
+
+:num[foo]:num[bar]:num[car]
+`,
+        {
+          template: [
+            `
+:::num{reset counter}
+# :num{#cnt1}
+:::
+:::num{increment counter}
+## :num{#cnt1}
+:::
+:::num{reset assign}
+## :num
+### :num
+:::
+`
+          ],
+          keepDefaultTemplate: true
+        }
       )
     ).toEqual(`# test
 

@@ -6,26 +6,21 @@ describe('normalizeOpts()', () => {
   it('should set default', () => {
     expect(normalizeOpts()).toEqual([remarkNumbersOptionsDefault])
     expect(normalizeOpts({})).toEqual([remarkNumbersOptionsDefault])
+    expect(normalizeOpts([{}])).toEqual([remarkNumbersOptionsDefault])
   })
   it('should use passed fields', () => {
-    expect(normalizeOpts({ template: '' })).toEqual([{ template: '' }])
-    expect(normalizeOpts({ template: 'test' })).toEqual([
+    expect(normalizeOpts({ template: [''] })).toEqual([
+      { template: [''], keepDefaultTemplate: false }
+    ])
+    expect(normalizeOpts({ template: ['test'] })).toEqual([
       {
-        template: 'test'
+        template: ['test'],
+        keepDefaultTemplate: false
       }
     ])
-  })
-  it('should use passed fields(array)', () => {
     expect(
-      normalizeOpts([{ template: 'test1' }, { template: 'test2' }])
-    ).toEqual([
-      {
-        template: 'test1'
-      },
-      {
-        template: 'test2'
-      }
-    ])
+      normalizeOpts({ template: ['test'], keepDefaultTemplate: true })
+    ).toEqual([{ template: ['test'], keepDefaultTemplate: true }])
   })
 })
 
