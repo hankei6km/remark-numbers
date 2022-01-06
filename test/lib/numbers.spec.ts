@@ -858,6 +858,9 @@ describe('remarkNumbers() opts.template', () => {
     expect(
       await f(
         `# test
+
+:num[sec]-:num[subsec]
+
 ## test 1
 
 :num[sec]
@@ -877,9 +880,60 @@ describe('remarkNumbers() opts.template', () => {
 ### test 1-1
 
 :num[sec]-:num[subsec]
+
+# test
+
+:num[sec]-:num[subsec]
+
+## test 1
+
+:num[sec]
+
+### test 1-1
+
+:num[sec]-:num[subsec]
+
+### test 1-2
+
+:num[sec]-:num[subsec]
+
+## test 2
+
+:num[sec]
+
+### test 1-1
+
+:num[sec]-:num[subsec]
+
 `
       )
     ).toEqual(`# test
+
+0-0
+
+## test 1
+
+1
+
+### test 1-1
+
+1-1
+
+### test 1-2
+
+1-2
+
+## test 2
+
+2
+
+### test 1-1
+
+2-1
+
+# test
+
+0-0
 
 ## test 1
 
