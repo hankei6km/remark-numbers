@@ -52,11 +52,11 @@ export const remarkNumbers: Plugin<
 > = function remarkNumbers(
   opts?: RemarkNumbersOptions | RemarkNumbersOptions[]
 ): Transformer {
-  const nopts = normalizeOpts(opts)
+  const nopts = normalizeOpts(opts)[0]
 
   // template をパース.
   // extension は directive のみ(gfm などは必要ないと思う).
-  const templates: string[] = nopts[0].template
+  const templates: string[] = nopts.template
     .filter((template) => template)
     .map((template) =>
       JSON.stringify(
