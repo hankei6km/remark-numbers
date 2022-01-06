@@ -11,7 +11,7 @@ import { Assign } from './assign.js'
 import { Counter } from './counter.js'
 import { decodeParents, getRefernceFromLabel, normalizeOpts } from './util.js'
 
-const directiveName = 'num'
+export const directiveName = 'num'
 
 export type RemarkNumbersOptions = { template?: string }
 export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
@@ -26,6 +26,12 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 :::
 :::num{reset assign}
 ## :num
+:::
+:::num{format assign}
+:num[:num[sec]-:num]{series=fig}
+:num[:num[sec]-:num]{series=photo}
+:num[:num[sec]-:num]{series=chart}
+:num[:num[sec]-:num]{series=tbl}
 :::
 ` // とりあえず.
 }
@@ -84,7 +90,7 @@ export const remarkNumbers: Plugin<
   const visitTest = (node: Node) => {
     if (
       node.type === 'textDirective' &&
-      (node as ContainerDirective).name === directiveName
+      (node as TextDirective).name === directiveName
     ) {
       return true
     }
@@ -176,6 +182,25 @@ export const remarkNumbers: Plugin<
         })
         parent.children.splice(nodeIdx, 1)
         return nodeIdx
+      } else if (d.attributes?.format !== undefined) {
+        // format 用定義.
+        const [, parent, nodeIdx] = decodeParents(parents, node)
+        // paragraph 内の :num[foo]{series=bar} を探す.
+        d.children.forEach((n) => {
+          if (n.type == 'paragraph') {
+            n.children.forEach((t) => {
+              if (
+                t.type === 'textDirective' &&
+                t.children.length > 1 &&
+                t.attributes?.series != undefined
+              ) {
+                assign.setFormat(t.attributes.series, t.children)
+              }
+            })
+          }
+        })
+        parent.children.splice(nodeIdx, 1)
+        return nodeIdx
       }
     }
 
@@ -204,12 +229,12 @@ export const remarkNumbers: Plugin<
             parent.children.splice(nodeIdx, 1)
             return nodeIdx
           } else {
-            // assign の define.
-            // define は define された回数を値として設定、そのまま値をテキストとして扱う.
-            assign.define(id)
+            // assign の define は define した回数が設定される.
+            // format 用に counter を渡す.
             parent.children[nodeIdx] = {
               type: 'text',
-              value: `${assign.look(id)}`
+              // value: `${assign.look(id)}`
+              value: assign.define(id, counter)
             }
             return SKIP
           }
@@ -297,7 +322,7 @@ export const remarkNumbers: Plugin<
           parent.children[nodeIdx] = errMessageNotDefined(ref)
         }
 
-        return nodeIdx
+        return SKIP
       }
     }
 
