@@ -8,22 +8,22 @@ describe('normalizeOpts()', () => {
     expect(normalizeOpts({})).toEqual([remarkNumbersOptionsDefault])
   })
   it('should use passed fields', () => {
-    expect(normalizeOpts({ template: '' })).toEqual([{ template: '' }])
-    expect(normalizeOpts({ template: 'test' })).toEqual([
+    expect(normalizeOpts({ template: [''] })).toEqual([{ template: [''] }])
+    expect(normalizeOpts({ template: ['test'] })).toEqual([
       {
-        template: 'test'
+        template: ['test']
       }
     ])
   })
   it('should use passed fields(array)', () => {
     expect(
-      normalizeOpts([{ template: 'test1' }, { template: 'test2' }])
+      normalizeOpts([{ template: ['test1'] }, { template: ['test2'] }])
     ).toEqual([
       {
-        template: 'test1'
+        template: ['test1']
       },
       {
-        template: 'test2'
+        template: ['test2']
       }
     ])
   })

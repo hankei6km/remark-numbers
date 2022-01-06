@@ -959,7 +959,8 @@ describe('remarkNumbers() opts.template', () => {
 :num[foo]:num[bar]:num[car]
 `,
         {
-          template: `
+          template: [
+            `
 :::num{reset counter}
 # :num{#cnt1}
 :::
@@ -971,6 +972,7 @@ describe('remarkNumbers() opts.template', () => {
 ### :num
 :::
 `
+          ]
         }
       )
     ).toEqual(`# test
@@ -1009,16 +1011,14 @@ describe('remarkNumbers() opts.template', () => {
 
 :num[foo]:num[bar]:num[car]
 `,
-        [
-          {
-            template: `
+
+        {
+          template: [
+            `
 :::num{reset counter}
 # :num{#cnt1}
-:::
-`
-          },
-          {
-            template: `
+:::`,
+            `
 :::num{increment counter}
 ## :num{#cnt1}
 :::
@@ -1027,8 +1027,8 @@ describe('remarkNumbers() opts.template', () => {
 ### :num
 :::
 `
-          }
-        ]
+          ]
+        }
       )
     ).toEqual(`# test
 
