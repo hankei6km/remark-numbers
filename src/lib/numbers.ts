@@ -22,6 +22,7 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
     `
 :::num{reset counter}
 # :num{#sec}
+# :num{#subsec}
 ## :num{#subsec}
 :::
 :::num{increment counter}
