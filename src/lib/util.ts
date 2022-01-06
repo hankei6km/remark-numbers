@@ -10,7 +10,11 @@ function _normalizeOpts(
     template:
       opts.template !== undefined
         ? opts.template
-        : remarkNumbersOptionsDefault.template
+        : remarkNumbersOptionsDefault.template,
+    keepDefaultTemplate:
+      opts.keepDefaultTemplate !== undefined
+        ? opts.keepDefaultTemplate
+        : remarkNumbersOptionsDefault.keepDefaultTemplate
   }
 }
 

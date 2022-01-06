@@ -13,7 +13,10 @@ import { decodeParents, getRefernceFromLabel, normalizeOpts } from './util.js'
 
 export const directiveName = 'num'
 
-export type RemarkNumbersOptions = { template?: string[] }
+export type RemarkNumbersOptions = {
+  template?: string[]
+  keepDefaultTemplate?: boolean
+}
 export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
   template: [
     `
@@ -35,7 +38,8 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 :num[:num[sec]-:num]{series=tbl}
 :::
 `
-  ]
+  ],
+  keepDefaultTemplate: false
 }
 
 export function errMessageNotDefined(id: string): Text {
@@ -56,7 +60,11 @@ export const remarkNumbers: Plugin<
 
   // template をパース.
   // extension は directive のみ(gfm などは必要ないと思う).
-  const templates: string[] = nopts.template
+  const templates: string[] = (
+    nopts.keepDefaultTemplate
+      ? remarkNumbersOptionsDefault.template.concat(nopts.template)
+      : nopts.template
+  )
     .filter((template) => template)
     .map((template) =>
       JSON.stringify(
