@@ -77,15 +77,15 @@ export class Counter {
       this.counters[name].set(value)
     }
   }
-  up(name: string): number | undefined {
+  up(name: string): string | undefined {
     if (this.counters[name]) {
-      return this.counters[name].up()
+      return `${this.counters[name].up()}`
     }
     return undefined
   }
-  look(name: string): number | undefined {
+  look(name: string): string | undefined {
     if (this.counters[name]) {
-      return this.counters[name].look()
+      return `${this.counters[name].look()}`
     }
     return undefined
   }
