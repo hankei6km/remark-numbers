@@ -7,6 +7,7 @@ import { TextDirective } from 'mdast-util-directive'
 import { decodeParents, getRefernceFromLabel } from './util.js'
 import { directiveName, errMessageNotDefined } from './numbers.js'
 import { Counter } from './counter.js'
+import { ConditionalFormat } from './format.js'
 
 export type AssignCounterTrigger = { type: string; depth: number }
 export class AssignCounter {
@@ -39,45 +40,18 @@ export class AssignCounter {
 
 export class Series extends AssignCounter {
   private name: string = ''
-  private format?: string // textDirective の label 部分の tree を JSON.stringify でシリアライズしたもの.
+  private format: ConditionalFormat = new ConditionalFormat()
   constructor(inName: string, formatLbale?: Node) {
     super()
     this.name = inName
   }
-  setFormat(formatLabel: Node[]) {
-    const r = {
-      type: 'paragraph',
-      children: formatLabel
-    }
-    this.format = JSON.stringify(r)
+  addFormat(formatLabel: Node[]) {
+    this.format.add(formatLabel)
   }
-  formattedUp(): Node | string {
-    // tree の組み立てなおしはここではないような気もする(Plugin の visitor 側の方がよいのでは).
+  formattedUp(counter: Counter): Node | string {
     const c = this.up()
-    if (this.format) {
-      const formattedNode = JSON.parse(this.format)
-      // format の tree を組み立てなおし、
-      // :num のみの node に今回の値をセットする
-      visitParents(
-        formattedNode,
-        (node: Node) => {
-          if (node.type === 'textDirective') {
-            const n = node as TextDirective
-            if (
-              n.name === directiveName &&
-              n.children.length === 0 &&
-              Object.keys(n.attributes || {}).length === 0
-            ) {
-              return true
-            }
-          }
-          return false
-        },
-        (node: Node, parents: Parent[]) => {
-          const [, parent, nodeIdx] = decodeParents(parents, node)
-          parent.children[nodeIdx] = { type: 'text', value: `${c}` }
-        }
-      )
+    const formattedNode = this.format.get(c, counter)
+    if (formattedNode) {
       return formattedNode
     }
     return `${c}`
@@ -108,13 +82,15 @@ function getFormatVisitor(counter: Counter) {
       // ここでは参照処理のみ.
       const [, parent, nodeIdx] = decodeParents(parents, node)
 
-      // 定義されていない場合はエラーメッセージ.
-      const v = counter.look(ref)
-      if (v !== undefined) {
-        parent.children[nodeIdx] = { type: 'text', value: `${v}` }
-      } else {
-        parent.children[nodeIdx] = errMessageNotDefined(ref)
-      }
+      // ConditionalFormat でカウンターが定義されていない状況はなくなった.
+      // // 定義されていない場合はエラーメッセージ.
+      // const v = counter.look(ref)
+      // if (v !== undefined) {
+      //   parent.children[nodeIdx] = { type: 'text', value: `${v}` }
+      // } else {
+      //   parent.children[nodeIdx] = errMessageNotDefined(ref)
+      // }
+      parent.children[nodeIdx] = { type: 'text', value: `${counter.look(ref)}` }
 
       return SKIP
     }
@@ -166,7 +142,7 @@ export class Assign {
     const s = this.getSeries(Assign.getSeriesName(id))
     // 存在している場合は上書き.
     // format は Counter class に含める方がよいか?
-    this.numbers[id] = formatLook(s.formattedUp(), counter)
+    this.numbers[id] = formatLook(s.formattedUp(counter), counter)
     return this.numbers[id]
   }
   look(id: string): string | undefined {
@@ -182,6 +158,6 @@ export class Assign {
   setFormat(seriesName: string, formatLabel: Node[]) {
     // seiries を取得.
     const s = this.getSeries(seriesName)
-    s.setFormat(formatLabel)
+    s.addFormat(formatLabel)
   }
 }
