@@ -1,5 +1,5 @@
 import { Node } from 'unist'
-import { Parent, Text } from 'mdast'
+import { Parent } from 'mdast'
 import { toMarkdown } from 'mdast-util-to-markdown'
 import { directiveToMarkdown } from 'mdast-util-directive'
 import { visitParents, SKIP } from 'unist-util-visit-parents'
