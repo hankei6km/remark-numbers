@@ -1280,6 +1280,12 @@ describe('remarkNumbers() opts.template', () => {
 :num{#car}
 
 :num[foo]:num[bar]:num[car]
+
+# test
+
+:num{#baz}
+
+:num[baz]
 `
       )
     ).toEqual(`# test
@@ -1297,6 +1303,12 @@ describe('remarkNumbers() opts.template', () => {
 1
 
 121
+
+# test
+
+1
+
+1
 `)
   })
   it('should use passed template', async () => {

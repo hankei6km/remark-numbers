@@ -32,6 +32,7 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 ### :num{#subsec}
 :::
 :::num{reset assign}
+# :num
 ## :num
 :::
 :::num{format assign}
