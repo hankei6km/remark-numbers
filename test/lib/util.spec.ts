@@ -10,17 +10,34 @@ describe('normalizeOpts()', () => {
   })
   it('should use passed fields', () => {
     expect(normalizeOpts({ template: [''] })).toEqual([
-      { template: [''], keepDefaultTemplate: false }
+      {
+        ...remarkNumbersOptionsDefault,
+        template: ['']
+      }
     ])
     expect(normalizeOpts({ template: ['test'] })).toEqual([
       {
-        template: ['test'],
-        keepDefaultTemplate: false
+        ...remarkNumbersOptionsDefault,
+        template: ['test']
       }
     ])
     expect(
       normalizeOpts({ template: ['test'], keepDefaultTemplate: true })
-    ).toEqual([{ template: ['test'], keepDefaultTemplate: true }])
+    ).toEqual([
+      {
+        ...remarkNumbersOptionsDefault,
+        template: ['test'],
+        keepDefaultTemplate: true
+      }
+    ])
+    expect(
+      normalizeOpts({ fldNameInFromtMatterToSwitchGrp: 'numGrpNameTest' })
+    ).toEqual([
+      {
+        ...remarkNumbersOptionsDefault,
+        fldNameInFromtMatterToSwitchGrp: 'numGrpNameTest'
+      }
+    ])
   })
 })
 

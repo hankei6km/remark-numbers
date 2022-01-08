@@ -2,6 +2,7 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import remarkDirective from 'remark-directive'
+import remarkFrontMatter from 'remark-frontmatter'
 import { remarkNumbers, RemarkNumbersOptions } from '../../src/lib/numbers.js'
 
 const f = async (
@@ -12,6 +13,7 @@ const f = async (
     unified()
       .use(remarkParse)
       .use(remarkDirective)
+      .use(remarkFrontMatter)
       .use(remarkNumbers, opts || {})
       .use(remarkStringify)
       .freeze()
@@ -601,6 +603,202 @@ test-1 2 --
 
 test-1 1 --
 test-1 2 --
+`)
+  })
+  it('should apply only format that is selected by group name', async () => {
+    expect(
+      await f(
+        `---
+title: tesst
+type: idea
+numGroupName: simple
+---
+# test
+
+:::num{format assign}
+:num[global-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=simple}
+:num[simple-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=section}
+:num[section test-1 :num[sec]-:num --]{series=t1}
+:::
+
+## test 1
+
+:num{#t1-foo}
+:num{#t1-bar}
+
+:num[t1-foo]
+:num[t1-bar]
+`
+      )
+    ).toEqual(`---
+title: tesst
+type: idea
+---
+
+# test
+
+## test 1
+
+simple-test-1 1 --
+simple-test-1 2 --
+
+simple-test-1 1 --
+simple-test-1 2 --
+`)
+  })
+  it('should apply only format that is selected by group name(fldNameInFromtMatterToSwitchGrp)', async () => {
+    expect(
+      await f(
+        `---
+title: tesst
+type: idea
+grp: simple
+---
+# test
+
+:::num{format assign}
+:num[global-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=simple}
+:num[simple-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=section}
+:num[section test-1 :num[sec]-:num --]{series=t1}
+:::
+
+## test 1
+
+:num{#t1-foo}
+:num{#t1-bar}
+
+:num[t1-foo]
+:num[t1-bar]
+`,
+        {
+          fldNameInFromtMatterToSwitchGrp: 'grp'
+        }
+      )
+    ).toEqual(`---
+title: tesst
+type: idea
+---
+
+# test
+
+## test 1
+
+simple-test-1 1 --
+simple-test-1 2 --
+
+simple-test-1 1 --
+simple-test-1 2 --
+`)
+  })
+  it('should apply only format that is selected by group name(template from options)', async () => {
+    expect(
+      await f(
+        `---
+title: tesst
+type: idea
+numGroupName: simple
+---
+# test
+
+## test 1
+
+:num{#t1-foo}
+:num{#t1-bar}
+
+:num[t1-foo]
+:num[t1-bar]
+`,
+        {
+          template: [
+            `
+:::num{format assign}
+:num[global-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=simple}
+:num[simple-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=section}
+:num[section test-1 :num[sec]-:num --]{series=t1}
+:::
+
+        `
+          ]
+        }
+      )
+    ).toEqual(`---
+title: tesst
+type: idea
+---
+
+# test
+
+## test 1
+
+simple-test-1 1 --
+simple-test-1 2 --
+
+simple-test-1 1 --
+simple-test-1 2 --
+`)
+  })
+  it('should not apply named format', async () => {
+    expect(
+      await f(
+        `---
+title: tesst
+type: idea
+---
+# test
+
+:::num{format assign}
+:num[global-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=simple}
+:num[simple-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=section}
+:num[section test-1 :num[sec]-:num --]{series=t1}
+:::
+
+## test 1
+
+:num{#t1-foo}
+:num{#t1-bar}
+
+:num[t1-foo]
+:num[t1-bar]
+`
+      )
+    ).toEqual(`---
+title: tesst
+type: idea
+---
+
+# test
+
+## test 1
+
+global-test-1 1 --
+global-test-1 2 --
+
+global-test-1 1 --
+global-test-1 2 --
 `)
   })
   it('should increment counter by "define"', async () => {
