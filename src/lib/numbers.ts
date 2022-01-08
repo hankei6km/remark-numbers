@@ -353,18 +353,11 @@ export const remarkNumbers: Plugin<
       }
     }
 
-    templates.forEach((template) => {
-      const tree = JSON.parse(template)
-      // template で前処理
-      visitParents(tree, visitTestCounterPre, visitorCounterPre)
-      visitParents(tree, visitTestAssignPre, visitorAssignPre)
-    })
-
+    // yaml 経由の options を処理する.
     if (tree.type === 'root') {
       try {
         ;(tree as Root).children.forEach((n) => {
           if (n.type === 'yaml' && n.value) {
-            // yaml 経由の options を処理する.
             const o = yaml.load(n.value)
             // グループ名の設定
             if (
@@ -381,6 +374,14 @@ export const remarkNumbers: Plugin<
         // とくになにもしない
       }
     }
+
+    // template の処理.
+    templates.forEach((template) => {
+      const tree = JSON.parse(template)
+      // template で前処理
+      visitParents(tree, visitTestCounterPre, visitorCounterPre)
+      visitParents(tree, visitTestAssignPre, visitorAssignPre)
+    })
 
     // 前処理、reset の設定などが実行される
     visitParents(tree, visitTestCounterPre, visitorCounterPre)

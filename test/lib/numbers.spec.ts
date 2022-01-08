@@ -702,6 +702,59 @@ simple-test-1 1 --
 simple-test-1 2 --
 `)
   })
+  it('should apply only format that is selected by group name(template from options)', async () => {
+    expect(
+      await f(
+        `---
+title: tesst
+type: idea
+numGroupName: simple
+---
+# test
+
+## test 1
+
+:num{#t1-foo}
+:num{#t1-bar}
+
+:num[t1-foo]
+:num[t1-bar]
+`,
+        {
+          template: [
+            `
+:::num{format assign}
+:num[global-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=simple}
+:num[simple-test-1 :num --]{series=t1}
+:::
+
+:::num{format assign name=section}
+:num[section test-1 :num[sec]-:num --]{series=t1}
+:::
+
+        `
+          ]
+        }
+      )
+    ).toEqual(`---
+title: tesst
+type: idea
+---
+
+# test
+
+## test 1
+
+simple-test-1 1 --
+simple-test-1 2 --
+
+simple-test-1 1 --
+simple-test-1 2 --
+`)
+  })
   it('should not apply named format', async () => {
     expect(
       await f(
