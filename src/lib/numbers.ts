@@ -6,6 +6,7 @@ import { directive } from 'micromark-extension-directive'
 import { directiveFromMarkdown } from 'mdast-util-directive'
 import { TextDirective, ContainerDirective } from 'mdast-util-directive'
 import { visitParents, SKIP } from 'unist-util-visit-parents'
+import yaml from 'js-yaml'
 import toSafeInteger from 'lodash.tosafeinteger'
 import { Assign } from './assign.js'
 import { Counter } from './counter.js'
@@ -16,6 +17,7 @@ export const directiveName = 'num'
 export type RemarkNumbersOptions = {
   template?: string[]
   keepDefaultTemplate?: boolean
+  fldNameInFromtMatterToSwitchGrp?: string
 }
 export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
   template: [
@@ -43,7 +45,8 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 :::
 `
   ],
-  keepDefaultTemplate: false
+  keepDefaultTemplate: false,
+  fldNameInFromtMatterToSwitchGrp: 'numGroupName'
 }
 
 export function errMessageNotDefined(id: string): Text {
@@ -61,6 +64,7 @@ export const remarkNumbers: Plugin<
   opts?: RemarkNumbersOptions | RemarkNumbersOptions[]
 ): Transformer {
   const nopts = normalizeOpts(opts)[0]
+  let grpName = ''
 
   // template をパース.
   // extension は directive のみ(gfm などは必要ないと思う).
@@ -199,20 +203,29 @@ export const remarkNumbers: Plugin<
       } else if (d.attributes?.format !== undefined) {
         // format 用定義.
         const [, parent, nodeIdx] = decodeParents(parents, node)
-        // paragraph 内の :num[foo]{series=bar} を探す.
-        d.children.forEach((n) => {
-          if (n.type == 'paragraph') {
-            n.children.forEach((t) => {
-              if (
-                t.type === 'textDirective' &&
-                t.children.length > 1 &&
-                t.attributes?.series != undefined
-              ) {
-                assign.setFormat(t.attributes.series, t.children)
-              }
-            })
-          }
-        })
+        // group 指定をチェックする.
+        // name 属性が指定されていない = グローバルなので通す.
+        // name 属性と grpName が一致 = 指定されたグループなので通す.
+        if (
+          d.attributes.name === undefined ||
+          d.attributes.name === '' ||
+          d.attributes.name === grpName
+        ) {
+          // paragraph 内の :num[foo]{series=bar} を探す.
+          d.children.forEach((n) => {
+            if (n.type == 'paragraph') {
+              n.children.forEach((t) => {
+                if (
+                  t.type === 'textDirective' &&
+                  t.children.length > 1 &&
+                  t.attributes?.series != undefined
+                ) {
+                  assign.setFormat(t.attributes.series, t.children)
+                }
+              })
+            }
+          })
+        }
         parent.children.splice(nodeIdx, 1)
         return nodeIdx
       }
@@ -346,6 +359,28 @@ export const remarkNumbers: Plugin<
       visitParents(tree, visitTestCounterPre, visitorCounterPre)
       visitParents(tree, visitTestAssignPre, visitorAssignPre)
     })
+
+    if (tree.type === 'root') {
+      try {
+        ;(tree as Root).children.forEach((n) => {
+          if (n.type === 'yaml' && n.value) {
+            // yaml 経由の options を処理する.
+            const o = yaml.load(n.value)
+            // グループ名の設定
+            if (
+              typeof o === 'object' &&
+              (o as any)[nopts.fldNameInFromtMatterToSwitchGrp] !== undefined
+            ) {
+              grpName = (o as any)[nopts.fldNameInFromtMatterToSwitchGrp]
+              delete (o as any)[nopts.fldNameInFromtMatterToSwitchGrp]
+            }
+            n.value = yaml.dump(o, {}).replace(/\n$/, '')
+          }
+        })
+      } catch (_err) {
+        // とくになにもしない
+      }
+    }
 
     // 前処理、reset の設定などが実行される
     visitParents(tree, visitTestCounterPre, visitorCounterPre)

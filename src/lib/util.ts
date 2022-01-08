@@ -14,7 +14,11 @@ function _normalizeOpts(
     keepDefaultTemplate:
       opts.keepDefaultTemplate !== undefined
         ? opts.keepDefaultTemplate
-        : remarkNumbersOptionsDefault.keepDefaultTemplate
+        : remarkNumbersOptionsDefault.keepDefaultTemplate,
+    fldNameInFromtMatterToSwitchGrp:
+      opts.fldNameInFromtMatterToSwitchGrp !== undefined
+        ? opts.fldNameInFromtMatterToSwitchGrp
+        : remarkNumbersOptionsDefault.fldNameInFromtMatterToSwitchGrp
   }
 }
 
