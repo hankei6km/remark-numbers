@@ -1059,6 +1059,61 @@ s1(ReferenceError: "bar" is not defined)s2
 `
     )
   })
+  it('should apply only reset contaianer that is selected by group name', async () => {
+    expect(
+      await f(
+        `---
+title: tesst
+type: idea
+numGroupName: simple
+---
+# test
+
+:::num{reset assign name=simple}
+## :num{delete}
+:::
+
+:::num{reset assign name=subsec}
+## :num
+### :num
+:::
+
+
+## head2-1
+
+:num{#test1-foo}
+
+:num{#test1-bar}
+
+## head2-2
+
+:num{#test1-car}
+
+:num[test1-foo]:num[test1-bar]:num[test1-car]
+`
+      )
+    ).toEqual(
+      `---
+title: tesst
+type: idea
+---
+
+# test
+
+## head2-1
+
+1
+
+2
+
+## head2-2
+
+3
+
+123
+`
+    )
+  })
   it('should escape varble name in error message', async () => {
     expect(
       await f(`# test

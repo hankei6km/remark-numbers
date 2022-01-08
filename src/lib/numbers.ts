@@ -187,21 +187,30 @@ export const remarkNumbers: Plugin<
       if (d.attributes?.reset !== undefined) {
         // reset 用定義.
         const [, parent, nodeIdx] = decodeParents(parents, node)
-        // とりあえず heading のみ対応.
-        d.children.forEach((n) => {
-          if (
-            n.type == 'heading' &&
-            n.children.length === 1 &&
-            n.children[0].type === 'textDirective' &&
-            n.children[0].name === directiveName
-          ) {
-            if (n.children[0].attributes?.delete === undefined) {
-              assign.addResetTrigger({ type: n.type, depth: n.depth })
-            } else {
-              assign.deleteResetTrigger({ type: n.type, depth: n.depth })
+        // group 指定をチェックする.
+        // name 属性が指定されていない = グローバルなので通す.
+        // name 属性と grpName が一致 = 指定されたグループなので通す.
+        if (
+          d.attributes.name === undefined ||
+          d.attributes.name === '' ||
+          d.attributes.name === grpName
+        ) {
+          // とりあえず heading のみ対応.
+          d.children.forEach((n) => {
+            if (
+              n.type == 'heading' &&
+              n.children.length === 1 &&
+              n.children[0].type === 'textDirective' &&
+              n.children[0].name === directiveName
+            ) {
+              if (n.children[0].attributes?.delete === undefined) {
+                assign.addResetTrigger({ type: n.type, depth: n.depth })
+              } else {
+                assign.deleteResetTrigger({ type: n.type, depth: n.depth })
+              }
             }
-          }
-        })
+          })
+        }
         parent.children.splice(nodeIdx, 1)
         return nodeIdx
       } else if (d.attributes?.format !== undefined) {
