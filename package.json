@@ -1,6 +1,6 @@
 {
   "name": "@hankei6km/remark-numbers",
-  "version": "0.2.0-pre.9",
+  "version": "0.2.0-pre.10",
   "description": "remark plugin to assign serial numbers",
   "author": "hankei6km <hankei6km@gmail.com> (https://github.com/hankei6km)",
   "license": "MIT",
