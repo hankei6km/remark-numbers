@@ -17,6 +17,12 @@ export class AssignCounter {
   addResetTrigger(t: AssignCounterTrigger) {
     this.resetTrigger.push({ type: t.type, depth: t.depth })
   }
+  deleteResetTrigger(t: AssignCounterTrigger) {
+    // 保存されているトリガーから指定のものをすべて削除(一致しないものを残す).
+    this.resetTrigger = this.resetTrigger.filter(
+      ({ type, depth }) => type !== t.type || depth !== t.depth
+    )
+  }
   reset(node: Node, parents: Parent[]): boolean {
     if (
       parents.length === 1 &&
@@ -149,8 +155,16 @@ export class Assign {
     return this.numbers[id]
   }
   addResetTrigger(t: AssignCounterTrigger) {
-    // ここでは定義を保存しておくだけ(add するときに設定する).
+    // ここでは定義を保存しておくだけ(getSeries のときに設定する).
     this.resetTrigger.push({ type: t.type, depth: t.depth })
+  }
+  deleteResetTrigger(t: AssignCounterTrigger) {
+    // 保存されているトリガーから指定のものをすべて削除(一致しないものを残す).
+    this.resetTrigger = this.resetTrigger.filter(
+      ({ type, depth }) => type !== t.type || depth !== t.depth
+    )
+    // series からも削除する.
+    Object.values(this._series).forEach((s) => s.deleteResetTrigger(t))
   }
   reset(node: Node, parents: Parent[]) {
     Object.values(this._series).forEach((v) => v.reset(node, parents))

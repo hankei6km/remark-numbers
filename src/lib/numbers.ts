@@ -195,7 +195,11 @@ export const remarkNumbers: Plugin<
             n.children[0].type === 'textDirective' &&
             n.children[0].name === directiveName
           ) {
-            assign.addResetTrigger({ type: n.type, depth: n.depth })
+            if (n.children[0].attributes?.delete === undefined) {
+              assign.addResetTrigger({ type: n.type, depth: n.depth })
+            } else {
+              assign.deleteResetTrigger({ type: n.type, depth: n.depth })
+            }
           }
         })
         parent.children.splice(nodeIdx, 1)

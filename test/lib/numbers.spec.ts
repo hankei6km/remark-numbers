@@ -1007,6 +1007,58 @@ s1(ReferenceError: "bar" is not defined)s2
 `
     )
   })
+  it('should delete reset trriger', async () => {
+    expect(
+      await f(
+        `# test
+
+:::num{reset assign}
+## :num
+### :num
+:::
+
+:::num{reset assign}
+## :num{delete}
+:::
+
+## head2-1
+
+:num{#test1-foo}
+
+:num{#test1-bar}
+
+## head2-2
+
+:num{#test1-car}
+
+### head3-1
+
+:num{#test1-baz}
+
+:num[test1-foo]:num[test1-bar]:num[test1-car]:num[test1-baz]
+`
+      )
+    ).toEqual(
+      `# test
+
+## head2-1
+
+1
+
+2
+
+## head2-2
+
+3
+
+### head3-1
+
+1
+
+1231
+`
+    )
+  })
   it('should escape varble name in error message', async () => {
     expect(
       await f(`# test
