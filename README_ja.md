@@ -786,7 +786,7 @@ MIT License
 Copyright (c) 2022 hankei6km
 
 [`remark-directive`]: https://github.com/remarkjs/remark-directive
-[`remark-directive`]: https://github.com/remarkjs/remark-directive
+[`remark-frontmatter`]: https://github.com/remarkjs/remark-frontmatter
 [`remark-cli`]: (https://github.com/remarkjs/remark/tree/main/packages/remark-cli)
 [`rehype-sanitize`]: https://github.com/rehypejs/rehype-sanitize
 
