@@ -33,6 +33,33 @@ describe('AssingCounter', () => {
     ).toBeFalsy()
     expect(counter.up()).toEqual(3)
   })
+  it('should delete reset trigger', async () => {
+    const counter = new AssignCounter()
+    counter.addResetTrigger({ type: 'heading', depth: 2 })
+    counter.addResetTrigger({ type: 'heading', depth: 3 })
+    counter.addResetTrigger({ type: 'heading', depth: 2 }) // すべて削除されるかの確認用.
+    expect(counter.up()).toEqual(1)
+    expect(
+      counter.reset({ type: 'heading', depth: 2 } as Node, [
+        { type: 'root', children: [] }
+      ])
+    ).toBeTruthy()
+    expect(counter.up()).toEqual(1)
+    counter.deleteResetTrigger({ type: 'heading', depth: 2 })
+    expect(
+      counter.reset({ type: 'heading', depth: 2 } as Node, [
+        { type: 'root', children: [] }
+      ])
+    ).toBeFalsy()
+    expect(counter.up()).toEqual(2)
+    expect(
+      counter.reset({ type: 'heading', depth: 3 } as Node, [
+        { type: 'root', children: [] }
+      ])
+    ).toBeTruthy()
+    // depth 3 は残っている.
+    expect(counter.up()).toEqual(1)
+  })
 })
 
 describe('Assign', () => {
@@ -84,6 +111,41 @@ describe('Assign', () => {
     expect(numbers.look('fig-foo')).toEqual('1')
     expect(numbers.look('fig-bar')).toEqual('1')
     expect(numbers.look('fig-car')).toEqual('2')
+  })
+  it('should delete reset trigger', async () => {
+    const counter = new Counter()
+    const numbers = new Assign()
+    numbers.addResetTrigger({ type: 'heading', depth: 2 })
+    numbers.addResetTrigger({ type: 'heading', depth: 3 })
+    numbers.addResetTrigger({ type: 'heading', depth: 2 }) // すべて削除されるかの確認用.
+
+    numbers.define('foo', counter)
+    numbers.define('test1-foo', counter)
+    numbers.reset({ type: 'heading', depth: 2 } as Node, [
+      { type: 'root', children: [] }
+    ])
+    numbers.define('bar', counter)
+    numbers.define('test1-bar', counter)
+    expect(numbers.look('bar')).toEqual('1')
+    expect(numbers.look('test1-bar')).toEqual('1')
+
+    numbers.deleteResetTrigger({ type: 'heading', depth: 2 })
+
+    numbers.reset({ type: 'heading', depth: 2 } as Node, [
+      { type: 'root', children: [] }
+    ])
+    numbers.define('car', counter)
+    numbers.define('test1-car', counter)
+    expect(numbers.look('car')).toEqual('2') // リセットされていないので bar=1 からカウント継続.
+    expect(numbers.look('test1-car')).toEqual('2')
+
+    numbers.reset({ type: 'heading', depth: 3 } as Node, [
+      { type: 'root', children: [] }
+    ])
+    numbers.define('baz', counter)
+    numbers.define('test1-baz', counter)
+    expect(numbers.look('baz')).toEqual('1') // depth は 3 残っている.
+    expect(numbers.look('test1-baz')).toEqual('1') // depth は 3 残っている.
   })
   it('should get formatted value', async () => {
     const counter = new Counter()
