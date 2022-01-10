@@ -5,6 +5,7 @@ remark plugin to assign serial numbers.
 ## Requirement
 
 - [`remark-directive`]
+- [`remark-frontmatter`]
 
 
 ## CLI
@@ -287,8 +288,10 @@ Screenshot(図 2-1)
 input:
 ```markdown
 ---
+title: test
 numGroupName: simple
 ---
+
 # test
 
 :::num{format assign}
@@ -326,6 +329,10 @@ Screenshot:num[fig-vscode]
 
 yield:
 ```markdown
+---
+title: test
+---
+
 # test
 
 ![Editors](/images/editors.png)
@@ -776,6 +783,7 @@ MIT License
 Copyright (c) 2022 hankei6km
 
 [`remark-directive`]: https://github.com/remarkjs/remark-directive
+[`remark-frontmatter`]: https://github.com/remarkjs/remark-frontmatter
 [`remark-cli`]: (https://github.com/remarkjs/remark/tree/main/packages/remark-cli)
 [`rehype-sanitize`]: https://github.com/rehypejs/rehype-sanitize
 
