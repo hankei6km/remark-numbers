@@ -43,6 +43,7 @@ export const remarkNumbersOptionsDefault: Required<RemarkNumbersOptions> = {
 :num[:num[sec]-:num]{series=diagram}
 :num[:num[sec]-:num]{series=flow}
 :num[:num[sec]-:num]{series=tbl}
+:num[:num[sec]-:num]{series=list}
 :::
 `
   ],
